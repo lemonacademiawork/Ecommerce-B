@@ -1,6 +1,7 @@
 package com.lemonacademy.ecommerce.security;
 
 import com.lemonacademy.ecommerce.entity.User;
+import com.lemonacademy.ecommerce.entity.Admin;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -19,10 +20,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret:defaultSecretKeyWithAtLeast32BytesLengthForSecurityHS256}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration}")
     private long jwtExpiration;
 
     public String generateToken(User user) {
@@ -40,6 +41,23 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
+    }
+
+    public String generateToken(Admin admin) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", admin.getRole().name());
+        claims.put("name", admin.getFullName());
+        return Jwts.builder()
+                .claims(claims)
+                .subject(admin.getEmail())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public String extractUsername(String token) {

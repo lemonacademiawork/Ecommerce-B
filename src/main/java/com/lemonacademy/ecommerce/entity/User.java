@@ -33,11 +33,15 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
 
-    @Column
+    @Column(unique = true)
     private String phone;
 
     @Column
     private String password;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
 
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
@@ -68,7 +72,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return email != null ? email : phone;
     }
 
     @Override
@@ -88,6 +92,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 }

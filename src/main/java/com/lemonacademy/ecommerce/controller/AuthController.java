@@ -4,7 +4,9 @@ import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.AuthResponse;
 import com.lemonacademy.ecommerce.dto.LoginRequest;
 import com.lemonacademy.ecommerce.dto.RegisterRequest;
+import com.lemonacademy.ecommerce.dto.SendOtpRequest;
 import com.lemonacademy.ecommerce.dto.TokenRequest;
+import com.lemonacademy.ecommerce.dto.VerifyOtpRequest;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,11 +45,32 @@ public class AuthController {
                 .ok(ApiResponse.success("Login successful", authResponse));
     }
 
-    @PostMapping("/google")
-    @Operation(summary = "Login with Google OAuth ID token")
-    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody TokenRequest request) {
-        AuthResponse authResponse = authService.loginWithGoogle(request);
-        return ResponseEntity
-                .ok(ApiResponse.success("Google login successful", authResponse));
-    }
+        @PostMapping("/google")
+        @Operation(summary = "Login with Google OAuth ID token")
+        public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody TokenRequest request) {
+                AuthResponse authResponse = authService.loginWithGoogle(request);
+                return ResponseEntity
+                                .ok(ApiResponse.success("Google login successful", authResponse));
+        }
+
+        @PostMapping("/send-otp")
+        @Operation(summary = "Send OTP to phone number")
+        public ResponseEntity<ApiResponse<String>> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+                authService.sendOtp(request);
+                return ResponseEntity.ok(ApiResponse.success("OTP sent successfully", null));
+        }
+
+        @PostMapping("/resend-otp")
+        @Operation(summary = "Resend OTP to phone number")
+        public ResponseEntity<ApiResponse<String>> resendOtp(@Valid @RequestBody SendOtpRequest request) {
+                authService.sendOtp(request);
+                return ResponseEntity.ok(ApiResponse.success("OTP resent successfully", null));
+        }
+
+        @PostMapping("/verify-otp")
+        @Operation(summary = "Verify OTP and login")
+        public ResponseEntity<ApiResponse<AuthResponse>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+                AuthResponse authResponse = authService.verifyOtpLogin(request);
+                return ResponseEntity.ok(ApiResponse.success("Login successful", authResponse));
+        }
 }

@@ -19,9 +19,7 @@ public class RegisterRequest {
     @Email(message = "Email must be a valid email address")
     private String email;
 
-    @NotBlank(message = "Phone number must not be blank")
     private String phone;
 
-    @NotBlank(message = "Password must not be blank")
     private String password;
 }

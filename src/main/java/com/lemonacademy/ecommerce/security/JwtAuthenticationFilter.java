@@ -17,14 +17,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final AdminUserDetailsService adminUserDetailsService;
+
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            @org.springframework.beans.factory.annotation.Qualifier("customUserDetailsService") UserDetailsService userDetailsService,
+            AdminUserDetailsService adminUserDetailsService
+    ) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+        this.adminUserDetailsService = adminUserDetailsService;
+    }
 
     @Override
-    protected void doFilterInternal(
+    public void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
@@ -41,9 +51,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         try {
             userEmail = jwtService.extractUsername(jwt);
+            String role = jwtService.extractRole(jwt);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails;
+                if ("ADMIN".equals(role)) {
+                    userDetails = this.adminUserDetailsService.loadUserByUsername(userEmail);
+                } else {
+                    userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                }
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
