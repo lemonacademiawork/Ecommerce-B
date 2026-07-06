@@ -3,18 +3,16 @@ package com.lemonacademy.ecommerce.service;
 import com.lemonacademy.ecommerce.exception.InvalidOperationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OtpService {
 
-    private final StringRedisTemplate redisTemplate;
+    private final UpstashRedisService redisTemplate;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final String OTP_PREFIX = "OTP:";
@@ -31,7 +29,7 @@ public class OtpService {
         String otp = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
         
         // Save OTP
-        redisTemplate.opsForValue().set(OTP_PREFIX + phone, otp, Duration.ofMinutes(OTP_TTL_MINUTES));
+        redisTemplate.set(OTP_PREFIX + phone, otp, OTP_TTL_MINUTES * 60);
         
         // Update limits
         updateRateLimits(phone);
@@ -42,7 +40,7 @@ public class OtpService {
 
     public void verifyAndDeleteOtp(String phone, String otp) {
         String key = OTP_PREFIX + phone;
-        String storedOtp = redisTemplate.opsForValue().get(key);
+        String storedOtp = redisTemplate.get(key);
         
         if (storedOtp == null) {
             throw new InvalidOperationException("OTP expired or not found");
@@ -58,12 +56,12 @@ public class OtpService {
 
     private void checkRateLimits(String phone) {
         String cooldownKey = OTP_COOLDOWN_PREFIX + phone;
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(cooldownKey))) {
+        if (redisTemplate.hasKey(cooldownKey)) {
             throw new InvalidOperationException("Please wait before requesting another OTP");
         }
 
         String countKey = OTP_COUNT_PREFIX + phone;
-        String countStr = redisTemplate.opsForValue().get(countKey);
+        String countStr = redisTemplate.get(countKey);
         if (countStr != null && Integer.parseInt(countStr) >= MAX_OTP_REQUESTS) {
             throw new InvalidOperationException("Maximum OTP requests exceeded. Try again later.");
         }
@@ -74,12 +72,12 @@ public class OtpService {
         String cooldownKey = OTP_COOLDOWN_PREFIX + phone;
 
         // Set cooldown
-        redisTemplate.opsForValue().set(cooldownKey, "1", Duration.ofSeconds(COOLDOWN_SECONDS));
+        redisTemplate.set(cooldownKey, "1", COOLDOWN_SECONDS);
 
         // Increment count
-        Long count = redisTemplate.opsForValue().increment(countKey);
+        Long count = redisTemplate.increment(countKey);
         if (count != null && count == 1) {
-            redisTemplate.expire(countKey, Duration.ofMinutes(OTP_TTL_MINUTES));
+            redisTemplate.expire(countKey, OTP_TTL_MINUTES * 60);
         }
     }
 }
