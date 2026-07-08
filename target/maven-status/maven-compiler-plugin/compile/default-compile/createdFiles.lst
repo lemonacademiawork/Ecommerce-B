@@ -53,6 +53,7 @@ com\lemonacademy\ecommerce\controller\OrderController.class
 com\lemonacademy\ecommerce\entity\OrderItem.class
 com\lemonacademy\ecommerce\entity\Admin.class
 com\lemonacademy\ecommerce\entity\Admin$AdminBuilder.class
+com\lemonacademy\ecommerce\service\UpstashRedisService.class
 com\lemonacademy\ecommerce\dto\UpdateCartItemRequest.class
 com\lemonacademy\ecommerce\dto\ApiResponse.class
 com\lemonacademy\ecommerce\repository\AddressRepository.class
