@@ -24,12 +24,12 @@ public class CookieUtils {
         return Optional.empty();
     }
 
-    public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+    public static void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)
-                .secure(true) // Required for SameSite=None
-                .sameSite("None") // Survive cross-site redirects (Railway to Vercel)
+                .secure(request.isSecure())
+                .sameSite("Lax")
                 .maxAge(maxAge)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -43,8 +43,8 @@ public class CookieUtils {
                     ResponseCookie deleteCookie = ResponseCookie.from(name, "")
                             .path("/")
                             .httpOnly(true)
-                            .secure(true)
-                            .sameSite("None")
+                            .secure(request.isSecure())
+                            .sameSite("Lax")
                             .maxAge(0)
                             .build();
                     response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
