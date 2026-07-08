@@ -34,6 +34,9 @@ public class SecurityConfig {
     @Autowired(required = false)
     private OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
+    @Autowired(required = false)
+    private HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
+
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthFilter,
             @org.springframework.beans.factory.annotation.Qualifier("customUserDetailsService") UserDetailsService userDetailsService
@@ -60,6 +63,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> {
+                    if (cookieAuthorizationRequestRepository != null) {
+                        oauth2.authorizationEndpoint(authorization -> 
+                                authorization.authorizationRequestRepository(cookieAuthorizationRequestRepository)
+                        );
+                    }
                     if (oAuth2SuccessHandler != null) {
                         oauth2.successHandler(oAuth2SuccessHandler);
                     }

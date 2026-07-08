@@ -12,6 +12,7 @@ com\lemonacademy\ecommerce\dto\CartItemResponse.class
 com\lemonacademy\ecommerce\dto\PageResponseDto$PageResponseDtoBuilder.class
 com\lemonacademy\ecommerce\dto\ProductRequestDto.class
 com\lemonacademy\ecommerce\dto\AdminAuthResponse$AdminAuthResponseBuilder.class
+com\lemonacademy\ecommerce\security\CookieUtils.class
 com\lemonacademy\ecommerce\entity\OrderItem$OrderItemBuilder.class
 com\lemonacademy\ecommerce\dto\DashboardResponse$DashboardResponseBuilder.class
 com\lemonacademy\ecommerce\entity\Order.class
@@ -65,6 +66,7 @@ com\lemonacademy\ecommerce\controller\AdminUserController.class
 com\lemonacademy\ecommerce\entity\Product$ProductBuilder.class
 com\lemonacademy\ecommerce\dto\AuthResponse$AuthResponseBuilder.class
 com\lemonacademy\ecommerce\repository\ProductRepository.class
+com\lemonacademy\ecommerce\security\HttpCookieOAuth2AuthorizationRequestRepository.class
 com\lemonacademy\ecommerce\dto\ProductRequestDto$ProductRequestDtoBuilder.class
 com\lemonacademy\ecommerce\config\AdminInitializer.class
 com\lemonacademy\ecommerce\config\CorsConfig.class

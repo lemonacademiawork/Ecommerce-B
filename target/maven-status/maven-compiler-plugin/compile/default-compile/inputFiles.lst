@@ -72,7 +72,9 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\UserRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\AdminUserDetails.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\AdminUserDetailsService.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\CookieUtils.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\CustomUserDetailsService.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\HttpCookieOAuth2AuthorizationRequestRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\JwtAuthenticationFilter.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\JwtService.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\OAuth2AuthenticationFailureHandler.java

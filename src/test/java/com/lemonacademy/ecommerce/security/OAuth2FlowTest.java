@@ -18,12 +18,17 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import jakarta.servlet.http.Cookie;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -149,5 +154,43 @@ class OAuth2FlowTest {
         System.out.println("--- ACTUAL REDIRECT URL: " + redirectUrl);
         assertTrue(redirectUrl.contains("https://ecommercef-ten.vercel.app/oauth-failure"));
         assertTrue(redirectUrl.contains("error=OAuth2%20error"));
+    }
+
+    @Test
+    void repository_SavesAndLoadsRequestFromCookies() {
+        HttpCookieOAuth2AuthorizationRequestRepository repository = new HttpCookieOAuth2AuthorizationRequestRepository();
+        
+        OAuth2AuthorizationRequest authRequest = OAuth2AuthorizationRequest.authorizationCode()
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                .clientId("test-client")
+                .redirectUri("http://localhost:8080/login/oauth2/code/google")
+                .scopes(java.util.Set.of("email", "profile"))
+                .state("test-state")
+                .build();
+                
+        HttpServletRequest mockReq = mock(HttpServletRequest.class);
+        HttpServletResponse mockResp = mock(HttpServletResponse.class);
+        
+        // 1. Test Saving
+        repository.saveAuthorizationRequest(authRequest, mockReq, mockResp);
+        
+        verify(mockResp, atLeastOnce()).addHeader(eq("Set-Cookie"), anyString());
+        
+        // 2. Test Loading
+        Cookie cookie = new Cookie(HttpCookieOAuth2AuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
+                CookieUtils.serialize(authRequest));
+        when(mockReq.getCookies()).thenReturn(new Cookie[]{cookie});
+        
+        OAuth2AuthorizationRequest loadedRequest = repository.loadAuthorizationRequest(mockReq);
+        
+        assertNotNull(loadedRequest);
+        assertEquals("test-client", loadedRequest.getClientId());
+        assertEquals("test-state", loadedRequest.getState());
+        
+        // 3. Test Removing
+        OAuth2AuthorizationRequest removedRequest = repository.removeAuthorizationRequest(mockReq, mockResp);
+        assertNotNull(removedRequest);
+        assertEquals("test-client", removedRequest.getClientId());
+        verify(mockResp, atLeastOnce()).addHeader(eq("Set-Cookie"), contains("Max-Age=0"));
     }
 }
