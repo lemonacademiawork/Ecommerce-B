@@ -61,7 +61,7 @@ public class User implements UserDetails {
 
     @Column(name = "email_verified")
     @Builder.Default
-    private boolean emailVerified = false;
+    private Boolean emailVerified = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -112,5 +112,9 @@ public class User implements UserDetails {
 
     public AuthProvider getProvider() {
         return provider == null ? AuthProvider.LOCAL : provider;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified != null && emailVerified;
     }
 }
