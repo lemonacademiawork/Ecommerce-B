@@ -3,6 +3,7 @@ package com.lemonacademy.ecommerce.service;
 import com.lemonacademy.ecommerce.dto.ChangePasswordRequest;
 import com.lemonacademy.ecommerce.dto.UpdateProfileRequest;
 import com.lemonacademy.ecommerce.dto.UserProfileResponse;
+import com.lemonacademy.ecommerce.dto.UserResponse;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.exception.InvalidOperationException;
 import com.lemonacademy.ecommerce.repository.UserRepository;
@@ -12,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +64,13 @@ public class UserService {
         userRepository.save(dbUser);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToUserResponse)
+                .toList();
+    }
+
     private UserProfileResponse convertToResponse(User user) {
         return UserProfileResponse.builder()
                 .id(user.getId())
@@ -68,6 +78,18 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .role(user.getRole())
+                .build();
+    }
+
+    private UserResponse convertToUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .role(user.getRole())
+                .active(user.isActive())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

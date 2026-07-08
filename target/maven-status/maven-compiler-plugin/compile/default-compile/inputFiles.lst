@@ -6,6 +6,7 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\AdminDashboardController.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\AdminOrderController.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\AdminProductController.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\AdminUserController.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\AuthController.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\CartController.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\controller\CategoryController.java
@@ -40,6 +41,7 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UpdateCartItemRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UpdateProfileRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UserProfileResponse.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UserResponse.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\VerifyOtpRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\EcommerceApplication.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Address.java
