@@ -49,7 +49,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Builder.Default
     private AuthProvider provider = AuthProvider.LOCAL;
 
@@ -108,5 +108,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return active;
+    }
+
+    public AuthProvider getProvider() {
+        return provider == null ? AuthProvider.LOCAL : provider;
     }
 }
