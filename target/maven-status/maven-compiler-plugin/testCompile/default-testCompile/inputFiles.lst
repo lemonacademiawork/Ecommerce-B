@@ -12,6 +12,7 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\controller\UserControllerTest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\security\CustomUserDetailsServiceTest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\security\JwtServiceTest.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\security\OAuth2FlowTest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\service\AddressServiceTest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\service\AdminServiceTest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\test\java\com\lemonacademy\ecommerce\service\AuthServiceTest.java

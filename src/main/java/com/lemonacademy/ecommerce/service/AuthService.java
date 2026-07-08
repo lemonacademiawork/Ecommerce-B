@@ -1,13 +1,8 @@
 package com.lemonacademy.ecommerce.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import com.lemonacademy.ecommerce.dto.AuthResponse;
 import com.lemonacademy.ecommerce.dto.LoginRequest;
 import com.lemonacademy.ecommerce.dto.RegisterRequest;
-import com.lemonacademy.ecommerce.dto.TokenRequest;
 import com.lemonacademy.ecommerce.entity.Role;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.exception.UserAlreadyExistsException;
@@ -38,8 +33,7 @@ public class AuthService {
         private final OtpService otpService;
         private final WhatsappService whatsappService;
 
-        @Value("${google.client-id:}")
-        private String googleClientId;
+
 
         @Transactional
         public User register(RegisterRequest request) {
@@ -183,51 +177,4 @@ public class AuthService {
                                 .build();
         }
 
-        @Transactional
-        public AuthResponse loginWithGoogle(TokenRequest request) {
-                try {
-                        NetHttpTransport transport = new NetHttpTransport();
-                        GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
-                        GoogleIdTokenVerifier.Builder verifierBuilder = new GoogleIdTokenVerifier.Builder(transport, jsonFactory);
-
-                        if (googleClientId != null && !googleClientId.trim().isEmpty() && !googleClientId.contains("your-google-client-id")) {
-                                verifierBuilder.setAudience(Collections.singletonList(googleClientId));
-                        }
-
-                        GoogleIdTokenVerifier verifier = verifierBuilder.build();
-                        GoogleIdToken idToken = verifier.verify(request.getIdToken());
-
-                        if (idToken == null) {
-                                throw new IllegalArgumentException("Invalid Google ID Token");
-                        }
-
-                        GoogleIdToken.Payload payload = idToken.getPayload();
-                        String email = payload.getEmail();
-                        String rawName = (String) payload.get("name");
-                        final String displayName = rawName != null ? rawName : email.split("@")[0];
-
-                        User user = userRepository.findByEmail(email)
-                                        .orElseGet(() -> {
-                                                 User newUser = User.builder()
-                                                                 .name(displayName)
-                                                                 .email(email)
-                                                                 .role(Role.CUSTOMER)
-                                                                 .build();
-                                                 return userRepository.save(newUser);
-                                         });
-
-                        String jwtToken = jwtService.generateToken(user);
-
-                        return AuthResponse.builder()
-                                        .token(jwtToken)
-                                        .role(user.getRole().name())
-                                        .email(user.getEmail())
-                                        .name(user.getName())
-                                        .build();
-
-                } catch (Exception e) {
-                        throw new RuntimeException("Google authentication failed: " + e.getMessage(), e);
-                }
-        }
 }

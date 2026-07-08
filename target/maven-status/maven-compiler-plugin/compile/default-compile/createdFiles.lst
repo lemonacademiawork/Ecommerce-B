@@ -40,10 +40,9 @@ com\lemonacademy\ecommerce\dto\CartResponse.class
 com\lemonacademy\ecommerce\service\CartService.class
 com\lemonacademy\ecommerce\config\CloudinaryConfig.class
 com\lemonacademy\ecommerce\service\ProductService.class
-com\lemonacademy\ecommerce\dto\TokenRequest$TokenRequestBuilder.class
 com\lemonacademy\ecommerce\exception\ResourceNotFoundException.class
 com\lemonacademy\ecommerce\controller\CategoryController.class
-com\lemonacademy\ecommerce\dto\TokenRequest.class
+com\lemonacademy\ecommerce\dto\UserResponse$UserResponseBuilder.class
 com\lemonacademy\ecommerce\controller\ProductController.class
 com\lemonacademy\ecommerce\dto\OrderItemResponse$OrderItemResponseBuilder.class
 com\lemonacademy\ecommerce\service\WhatsappService.class
@@ -62,6 +61,7 @@ com\lemonacademy\ecommerce\entity\Category$CategoryBuilder.class
 com\lemonacademy\ecommerce\dto\OrderStatusRequest$OrderStatusRequestBuilder.class
 com\lemonacademy\ecommerce\repository\OrderRepository.class
 com\lemonacademy\ecommerce\security\CustomUserDetailsService.class
+com\lemonacademy\ecommerce\controller\AdminUserController.class
 com\lemonacademy\ecommerce\entity\Product$ProductBuilder.class
 com\lemonacademy\ecommerce\dto\AuthResponse$AuthResponseBuilder.class
 com\lemonacademy\ecommerce\repository\ProductRepository.class
@@ -72,8 +72,10 @@ com\lemonacademy\ecommerce\dto\UserProfileResponse.class
 com\lemonacademy\ecommerce\dto\ProductResponseDto$ProductResponseDtoBuilder.class
 com\lemonacademy\ecommerce\security\AdminUserDetails.class
 com\lemonacademy\ecommerce\dto\AddressRequest.class
+com\lemonacademy\ecommerce\security\OAuth2AuthenticationSuccessHandler.class
 com\lemonacademy\ecommerce\dto\ImageUploadResponse.class
 com\lemonacademy\ecommerce\security\JwtAuthenticationFilter.class
+com\lemonacademy\ecommerce\dto\UserResponse.class
 com\lemonacademy\ecommerce\controller\AdminProductController.class
 com\lemonacademy\ecommerce\service\AdminServiceImpl.class
 com\lemonacademy\ecommerce\dto\AddToCartRequest$AddToCartRequestBuilder.class
@@ -91,12 +93,14 @@ com\lemonacademy\ecommerce\dto\LoginRequest$LoginRequestBuilder.class
 com\lemonacademy\ecommerce\dto\UpdateProfileRequest.class
 com\lemonacademy\ecommerce\controller\AdminDashboardController.class
 com\lemonacademy\ecommerce\dto\OrderResponse.class
+com\lemonacademy\ecommerce\security\OAuth2AuthenticationFailureHandler.class
 com\lemonacademy\ecommerce\dto\AuthResponse.class
 com\lemonacademy\ecommerce\dto\AdminLoginRequest$AdminLoginRequestBuilder.class
 com\lemonacademy\ecommerce\dto\ApiResponse$ApiResponseBuilder.class
 com\lemonacademy\ecommerce\security\SecurityConfig.class
 com\lemonacademy\ecommerce\dto\UserProfileResponse$UserProfileResponseBuilder.class
 com\lemonacademy\ecommerce\dto\RegisterRequest.class
+com\lemonacademy\ecommerce\entity\AuthProvider.class
 com\lemonacademy\ecommerce\repository\CartRepository.class
 com\lemonacademy\ecommerce\service\CloudinaryService.class
 com\lemonacademy\ecommerce\security\AdminUserDetailsService.class

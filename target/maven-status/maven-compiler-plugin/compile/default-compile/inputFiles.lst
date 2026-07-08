@@ -37,7 +37,6 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\ProductResponseDto.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\RegisterRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\SendOtpRequest.java
-C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\TokenRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UpdateCartItemRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UpdateProfileRequest.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\dto\UserProfileResponse.java
@@ -46,6 +45,7 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\EcommerceApplication.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Address.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Admin.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\AuthProvider.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Cart.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\CartItem.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Category.java
@@ -75,6 +75,8 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\CustomUserDetailsService.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\JwtAuthenticationFilter.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\JwtService.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\OAuth2AuthenticationFailureHandler.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\OAuth2AuthenticationSuccessHandler.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\SecurityConfig.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\service\AddressService.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\service\AdminService.java

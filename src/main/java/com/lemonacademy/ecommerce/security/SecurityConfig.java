@@ -1,5 +1,6 @@
 package com.lemonacademy.ecommerce.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -26,9 +28,16 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
+    @Autowired(required = false)
+    private OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+
+    @Autowired(required = false)
+    private OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
+
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthFilter,
-            @org.springframework.beans.factory.annotation.Qualifier("customUserDetailsService") UserDetailsService userDetailsService) {
+            @org.springframework.beans.factory.annotation.Qualifier("customUserDetailsService") UserDetailsService userDetailsService
+    ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
@@ -38,16 +47,29 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/admin/auth/**",
-                                "/api/products/**", "/api/categories/**",
-                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
-                        .permitAll()
+                        "/api/products/**", "/api/categories/**",
+                        "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
+                        "/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**", "/api/user/**").hasRole("CUSTOMER")
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> {
+                    if (oAuth2SuccessHandler != null) {
+                        oauth2.successHandler(oAuth2SuccessHandler);
+                    }
+                    if (oAuth2FailureHandler != null) {
+                        oauth2.failureHandler(oAuth2FailureHandler);
+                    }
+                })
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -73,10 +95,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
-            JwtAuthenticationFilter filter) {
-        org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> registration = new org.springframework.boot.web.servlet.FilterRegistrationBean<>(
-                filter);
+    public org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(JwtAuthenticationFilter filter) {
+        org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> registration = 
+                new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }

@@ -5,7 +5,6 @@ import com.lemonacademy.ecommerce.dto.AuthResponse;
 import com.lemonacademy.ecommerce.dto.LoginRequest;
 import com.lemonacademy.ecommerce.dto.RegisterRequest;
 import com.lemonacademy.ecommerce.dto.SendOtpRequest;
-import com.lemonacademy.ecommerce.dto.TokenRequest;
 import com.lemonacademy.ecommerce.dto.VerifyOtpRequest;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.service.AuthService;
@@ -45,13 +44,7 @@ public class AuthController {
                 .ok(ApiResponse.success("Login successful", authResponse));
     }
 
-        @PostMapping("/google")
-        @Operation(summary = "Login with Google OAuth ID token")
-        public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody TokenRequest request) {
-                AuthResponse authResponse = authService.loginWithGoogle(request);
-                return ResponseEntity
-                                .ok(ApiResponse.success("Google login successful", authResponse));
-        }
+
 
         @PostMapping("/send-otp")
         @Operation(summary = "Send OTP to phone number")
