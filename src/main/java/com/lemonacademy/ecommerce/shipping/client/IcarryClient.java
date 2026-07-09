@@ -49,6 +49,7 @@ public class IcarryClient {
                         .uri(uri);
 
                 if (body instanceof MultiValueMap) {
+                    log.info("[DEBUG] Outbound Form Map: {}", body);
                     requestSpec.contentType(MediaType.APPLICATION_FORM_URLENCODED)
                                .body((MultiValueMap<?, ?>) body);
                 } else {
