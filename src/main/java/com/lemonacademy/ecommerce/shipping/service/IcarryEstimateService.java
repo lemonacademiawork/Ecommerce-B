@@ -58,6 +58,8 @@ public class IcarryEstimateService {
         body.add("origin_country_code", request.getOriginCountryCode() != null ? request.getOriginCountryCode() : "IN");
         body.add("destination_country_code", request.getDestinationCountryCode() != null ? request.getDestinationCountryCode() : "IN");
         body.add("shipment_mode", request.getShipmentMode() != null ? request.getShipmentMode() : "E");
+        body.add("parcel_type", request.getParcelType() != null ? request.getParcelType() : "P");
+        body.add("parcel_value", request.getParcelValue() != null ? request.getParcelValue().toString() : "100.00");
 
         try {
             String responseBody = client.post("/api_get_estimate", body, true);

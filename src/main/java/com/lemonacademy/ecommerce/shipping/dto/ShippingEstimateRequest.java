@@ -29,4 +29,7 @@ public class ShippingEstimateRequest {
     private String destinationCountryCode; // default IN
 
     private String shipmentMode; // E = Express, S = Surface, H = Hyperlocal
+
+    private String parcelType; // P = Prepaid, C = COD, R = Reverse
+    private java.math.BigDecimal parcelValue;
 }
