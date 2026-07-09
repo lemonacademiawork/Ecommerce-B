@@ -58,48 +58,36 @@ public class IcarryEstimateService {
         body.add("origin_country_code", request.getOriginCountryCode() != null ? request.getOriginCountryCode() : "IN");
         body.add("destination_country_code", request.getDestinationCountryCode() != null ? request.getDestinationCountryCode() : "IN");
         body.add("shipment_mode", request.getShipmentMode() != null ? request.getShipmentMode() : "E");
-        body.add("parcel_type", request.getParcelType() != null ? request.getParcelType() : "P");
-        body.add("parcel_value", request.getParcelValue() != null && request.getParcelValue().compareTo(java.math.BigDecimal.ZERO) > 0 ? request.getParcelValue().toString() : "100.00");
+        body.add("shipment_type", request.getParcelType() != null ? request.getParcelType() : "P");
+        body.add("shipment_value", request.getParcelValue() != null && request.getParcelValue().compareTo(java.math.BigDecimal.ZERO) > 0 ? request.getParcelValue().toString() : "100.00");
 
         try {
             String responseBody = client.post("/api_get_estimate", body, true);
             JsonNode root = objectMapper.readTree(responseBody);
             
             if (root.isObject() && root.has("error")) {
-                String errorMsg = root.get("error").toString();
-                log.error("iCarry Estimate API returned error: {}", errorMsg);
-                throw new com.lemonacademy.ecommerce.shipping.exception.IcarryApiException("iCarry Estimate API Error: " + errorMsg, 400);
+                String errorMsg = root.get("error").asText();
+                if (errorMsg != null && !errorMsg.isBlank()) {
+                    log.error("iCarry Estimate API returned error: {}", errorMsg);
+                    throw new com.lemonacademy.ecommerce.shipping.exception.IcarryApiException("iCarry Estimate API Error: " + errorMsg, 400);
+                }
             }
             
             List<CourierEstimateResponse> list = new ArrayList<>();
             
-            // Map rates - support different potential response structures from iCarry API
-            if (root.isArray()) {
+            // Map rates - iCarry returns { "success": 1, "estimate": [ ... ] }
+            if (root.has("estimate") && root.get("estimate").isArray()) {
+                for (JsonNode node : root.get("estimate")) {
+                    list.add(mapToResponse(node));
+                }
+            } else if (root.isArray()) {
                 for (JsonNode node : root) {
                     list.add(mapToResponse(node));
                 }
-            } else if (root.has("couriers")) {
-                JsonNode couriers = root.get("couriers");
-                if (couriers.isArray()) {
-                    for (JsonNode node : couriers) {
-                        list.add(mapToResponse(node));
-                    }
+            } else if (root.has("couriers") && root.get("couriers").isArray()) {
+                for (JsonNode node : root.get("couriers")) {
+                    list.add(mapToResponse(node));
                 }
-            } else if (root.has("rates")) {
-                JsonNode rates = root.get("rates");
-                if (rates.isArray()) {
-                    for (JsonNode node : rates) {
-                        list.add(mapToResponse(node));
-                    }
-                }
-            } else {
-                // If it's a flat object containing individual courier rates
-                root.fields().forEachRemaining(entry -> {
-                    JsonNode val = entry.getValue();
-                    if (val.isObject() && val.has("rate")) {
-                        list.add(mapToResponse(val));
-                    }
-                });
             }
             
             return list;
@@ -110,15 +98,23 @@ public class IcarryEstimateService {
     }
 
     private CourierEstimateResponse mapToResponse(JsonNode node) {
-        String courier = node.has("courier_name") ? node.get("courier_name").asText() : 
-                        (node.has("courier") ? node.get("courier").asText() : "Standard Courier");
-        double rate = node.has("rate") ? node.get("rate").asDouble() : 
-                     (node.has("charge") ? node.get("charge").asDouble() : 0.0);
+        // iCarry returns: courier_id, courier_name, courier_group_name, courier_cost
+        String courierId = node.has("courier_id") ? node.get("courier_id").asText() : null;
+        String courierName = node.has("courier_name") ? node.get("courier_name").asText() : 
+                            (node.has("courier") ? node.get("courier").asText() : "Standard Courier");
+        String courierGroupName = node.has("courier_group_name") ? node.get("courier_group_name").asText() : null;
+        
+        double rate = node.has("courier_cost") ? node.get("courier_cost").asDouble() : 
+                     (node.has("rate") ? node.get("rate").asDouble() : 
+                     (node.has("charge") ? node.get("charge").asDouble() : 0.0));
+        
         String eta = node.has("eta") ? node.get("eta").asText() : 
                     (node.has("delivery_days") ? node.get("delivery_days").asText() : "3-5 days");
         
         return CourierEstimateResponse.builder()
-                .courierName(courier)
+                .courierId(courierId)
+                .courierName(courierName)
+                .courierGroupName(courierGroupName)
                 .rate(BigDecimal.valueOf(rate))
                 .eta(eta)
                 .build();

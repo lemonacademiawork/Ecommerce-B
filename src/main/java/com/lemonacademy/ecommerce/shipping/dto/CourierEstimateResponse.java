@@ -12,7 +12,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class CourierEstimateResponse {
+    private String courierId;
     private String courierName;
+    private String courierGroupName;
     private BigDecimal rate;
     private String eta;
 }

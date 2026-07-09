@@ -125,7 +125,8 @@ public class ShippingControllersTest {
                 .destinationPincode("400001")
                 .weight(500)
                 .build();
-        CourierEstimateResponse est = new CourierEstimateResponse("Delhivery", BigDecimal.valueOf(120.0), "3 days");
+        CourierEstimateResponse est = CourierEstimateResponse.builder()
+                .courierName("Delhivery").rate(BigDecimal.valueOf(120.0)).eta("3 days").build();
         when(estimateService.getEstimate(any(ShippingEstimateRequest.class))).thenReturn(Collections.singletonList(est));
 
         mockMvcAdmin.perform(post("/api/admin/shipping/estimate")
