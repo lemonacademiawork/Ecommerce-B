@@ -63,6 +63,12 @@ public class IcarryEstimateService {
             String responseBody = client.post("/api_get_estimate", body, true);
             JsonNode root = objectMapper.readTree(responseBody);
             
+            if (root.isObject() && root.has("error")) {
+                String errorMsg = root.get("error").toString();
+                log.error("iCarry Estimate API returned error: {}", errorMsg);
+                throw new com.lemonacademy.ecommerce.shipping.exception.IcarryApiException("iCarry Estimate API Error: " + errorMsg, 400);
+            }
+            
             List<CourierEstimateResponse> list = new ArrayList<>();
             
             // Map rates - support different potential response structures from iCarry API
