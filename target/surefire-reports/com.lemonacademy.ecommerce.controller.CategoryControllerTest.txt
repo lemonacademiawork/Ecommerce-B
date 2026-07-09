@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.CategoryControllerTest
 -------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.832 s -- in com.lemonacademy.ecommerce.controller.CategoryControllerTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.733 s -- in com.lemonacademy.ecommerce.controller.CategoryControllerTest
