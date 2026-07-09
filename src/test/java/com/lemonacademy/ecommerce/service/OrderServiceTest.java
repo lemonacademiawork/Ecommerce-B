@@ -53,6 +53,9 @@ class OrderServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService icarryShipmentService;
+
     @InjectMocks
     private OrderService orderService;
 

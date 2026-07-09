@@ -43,8 +43,55 @@ public class Order {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "shipment_id")
+    private String shipmentId;
+
+    @Column(name = "tracking_number")
+    private String trackingNumber;
+
+    @Column(name = "awb_number")
+    private String awbNumber;
+
+    @Column(name = "courier_name")
+    private String courierName;
+
+    @Column(name = "shipment_status")
+    private String shipmentStatus;
+
+    @Column(name = "shipping_charge")
+    private BigDecimal shippingCharge;
+
+    @Column(name = "estimated_delivery_date")
+    private LocalDateTime estimatedDeliveryDate;
+
+    @Column(name = "label_url")
+    private String labelUrl;
+
+    @Column(name = "pickup_requested")
+    @Builder.Default
+    private Boolean pickupRequested = false;
+
+    @Column(name = "pickup_date")
+    private LocalDateTime pickupDate;
+
+    @Column(name = "reverse_shipment_id")
+    private String reverseShipmentId;
+
+    @Column(name = "delivery_attempts")
+    @Builder.Default
+    private Integer deliveryAttempts = 0;
+
+    @Column(name = "last_tracking_sync")
+    private LocalDateTime lastTrackingSync;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.pickupRequested == null) {
+            this.pickupRequested = false;
+        }
+        if (this.deliveryAttempts == null) {
+            this.deliveryAttempts = 0;
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.lemonacademy.ecommerce.dto.*;
 import com.lemonacademy.ecommerce.entity.*;
 import com.lemonacademy.ecommerce.exception.*;
 import com.lemonacademy.ecommerce.repository.*;
+import com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,7 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final IcarryShipmentService icarryShipmentService;
 
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -99,6 +101,18 @@ public class OrderService {
 
         // 5. Save Order
         Order savedOrder = orderRepository.save(order);
+
+        // 6. Automatically book shipment with iCarry
+        try {
+            Order booked = icarryShipmentService.bookShipmentForOrder(savedOrder);
+            if (booked != null) {
+                savedOrder = booked;
+            }
+        } catch (Exception e) {
+            // Fallback: update status to PENDING_BOOKING so it can be retried manually
+            savedOrder.setShipmentStatus("PENDING_BOOKING");
+            savedOrder = orderRepository.save(savedOrder);
+        }
 
         return convertToOrderResponse(savedOrder);
     }
@@ -181,6 +195,19 @@ public class OrderService {
                 .status(order.getStatus())
                 .items(itemResponses)
                 .createdAt(order.getCreatedAt())
+                .shipmentId(order.getShipmentId())
+                .trackingNumber(order.getTrackingNumber())
+                .awbNumber(order.getAwbNumber())
+                .courierName(order.getCourierName())
+                .shipmentStatus(order.getShipmentStatus())
+                .shippingCharge(order.getShippingCharge())
+                .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
+                .labelUrl(order.getLabelUrl())
+                .pickupRequested(order.getPickupRequested())
+                .pickupDate(order.getPickupDate())
+                .reverseShipmentId(order.getReverseShipmentId())
+                .deliveryAttempts(order.getDeliveryAttempts())
+                .lastTrackingSync(order.getLastTrackingSync())
                 .build();
     }
 }

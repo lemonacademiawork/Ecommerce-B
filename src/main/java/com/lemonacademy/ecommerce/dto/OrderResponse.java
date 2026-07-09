@@ -23,4 +23,19 @@ public class OrderResponse {
     private OrderStatus status;
     private List<OrderItemResponse> items;
     private LocalDateTime createdAt;
+
+    // Shipping Fields
+    private String shipmentId;
+    private String trackingNumber;
+    private String awbNumber;
+    private String courierName;
+    private String shipmentStatus;
+    private BigDecimal shippingCharge;
+    private LocalDateTime estimatedDeliveryDate;
+    private String labelUrl;
+    private Boolean pickupRequested;
+    private LocalDateTime pickupDate;
+    private String reverseShipmentId;
+    private Integer deliveryAttempts;
+    private LocalDateTime lastTrackingSync;
 }

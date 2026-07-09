@@ -13,4 +13,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserOrderByCreatedAtDesc(User user);
     List<Order> findAllByOrderByCreatedAtDesc();
     long countByStatus(OrderStatus status);
+    java.util.Optional<Order> findByAwbNumber(String awbNumber);
+    java.util.Optional<Order> findByShipmentId(String shipmentId);
 }

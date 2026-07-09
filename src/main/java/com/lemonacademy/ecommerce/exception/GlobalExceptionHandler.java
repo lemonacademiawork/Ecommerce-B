@@ -87,6 +87,41 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Access Denied"));
     }
 
+    @ExceptionHandler(com.lemonacademy.ecommerce.shipping.exception.DuplicateShipmentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateShipment(com.lemonacademy.ecommerce.shipping.exception.DuplicateShipmentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.lemonacademy.ecommerce.shipping.exception.ShipmentCancelledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleShipmentCancelled(com.lemonacademy.ecommerce.shipping.exception.ShipmentCancelledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.lemonacademy.ecommerce.shipping.exception.IcarryApiException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIcarryApi(com.lemonacademy.ecommerce.shipping.exception.IcarryApiException ex) {
+        int code = ex.getStatusCode();
+        HttpStatus status;
+        try {
+            status = HttpStatus.valueOf(code);
+        } catch (Exception e) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return ResponseEntity
+                .status(status)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.lemonacademy.ecommerce.shipping.exception.ShippingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleShipping(com.lemonacademy.ecommerce.shipping.exception.ShippingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         return ResponseEntity
