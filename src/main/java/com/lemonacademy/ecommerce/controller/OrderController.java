@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.OrderRequest;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
@@ -41,7 +43,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable UUID id) {
         OrderResponse response = orderService.getOrderDetails(id);
         return ResponseEntity.ok(ApiResponse.success("Order details retrieved successfully", response));
     }

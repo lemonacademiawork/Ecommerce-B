@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AuthResponse;
 import com.lemonacademy.ecommerce.dto.LoginRequest;
 import com.lemonacademy.ecommerce.dto.RegisterRequest;
@@ -59,7 +61,7 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         mockUser = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Test User")
                 .email("test@example.com")
                 .phone("+1234567890")
@@ -78,7 +80,7 @@ class AuthServiceTest {
         when(userRepository.existsByPhone("+1234567890")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User saved = invocation.getArgument(0);
-            saved.setId(1L);
+            saved.setId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
             return saved;
         });
         when(otpService.generateAndStoreOtp("+1234567890")).thenReturn("123456");
@@ -107,7 +109,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User saved = invocation.getArgument(0);
-            saved.setId(2L);
+            saved.setId(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf"));
             return saved;
         });
 

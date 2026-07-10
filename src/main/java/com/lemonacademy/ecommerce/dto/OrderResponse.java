@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.entity.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +19,8 @@ import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse.TrackingEvent;
 @Builder
 public class OrderResponse {
 
-    private Long id;
-    private Long userId;
+    private UUID id;
+    private UUID userId;
     private AddressResponse address;
     private BigDecimal totalAmount;
     private OrderStatus status;

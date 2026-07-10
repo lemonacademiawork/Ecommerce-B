@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.shipping.service;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.entity.Address;
 import com.lemonacademy.ecommerce.entity.Order;
@@ -80,7 +82,7 @@ public class ShippingServicesTest {
                 .build();
 
         order = Order.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .address(address)
                 .totalAmount(BigDecimal.valueOf(200.0))
                 .items(List.of(item))
@@ -141,11 +143,11 @@ public class ShippingServicesTest {
         order.setShipmentStatus("BOOKED");
 
         String responseJson = "{\"success\":true}";
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(client.post(eq("/api_cancel_shipment"), any(), eq(true))).thenReturn(responseJson);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order cancelledOrder = shipmentService.cancelShipment(1L);
+        Order cancelledOrder = shipmentService.cancelShipment(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertEquals("CANCELLED", cancelledOrder.getShipmentStatus());
         assertEquals(com.lemonacademy.ecommerce.entity.OrderStatus.CANCELLED, cancelledOrder.getStatus());
@@ -155,10 +157,10 @@ public class ShippingServicesTest {
     void testCancelShipmentDuplicate() {
         order.setShipmentId("SHIP123");
         order.setShipmentStatus("CANCELLED");
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
         assertThrows(ShipmentCancelledException.class, () -> {
-            shipmentService.cancelShipment(1L);
+            shipmentService.cancelShipment(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         });
     }
 
@@ -203,11 +205,11 @@ public class ShippingServicesTest {
         order.setAwbNumber("AWB123");
 
         String responseJson = "{\"label_url\":\"https://icarry.in/labels/SHIP123.pdf\"}";
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(client.post(eq("/api_label"), any(), eq(true))).thenReturn(responseJson);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        String labelUrl = labelService.generateLabel(1L);
+        String labelUrl = labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertEquals("https://icarry.in/labels/SHIP123.pdf", labelUrl);
         assertEquals("https://icarry.in/labels/SHIP123.pdf", order.getLabelUrl());
@@ -220,11 +222,11 @@ public class ShippingServicesTest {
         order.setPickupRequested(false);
 
         String responseJson = "{\"success\":true}";
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(client.post(eq("/api_request_pickup"), any(), eq(true))).thenReturn(responseJson);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order updatedOrder = pickupService.requestPickup(1L);
+        Order updatedOrder = pickupService.requestPickup(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertTrue(updatedOrder.getPickupRequested());
         assertNotNull(updatedOrder.getPickupDate());

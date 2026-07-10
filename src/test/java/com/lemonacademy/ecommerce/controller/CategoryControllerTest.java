@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.CategoryDto;
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
@@ -64,14 +66,14 @@ class CategoryControllerTest {
     @BeforeEach
     void setUp() {
         categoryDto = CategoryDto.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Electronics")
                 .imageUrl("http://example.com/img.jpg")
                 .active(true)
                 .build();
 
-        adminUser = User.builder().id(1L).email("admin@test.com").role(Role.ADMIN).build();
-        customerUser = User.builder().id(2L).email("customer@test.com").role(Role.CUSTOMER).build();
+        adminUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("admin@test.com").role(Role.ADMIN).build();
+        customerUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         List<CategoryDto> listResponse = Collections.singletonList(categoryDto);
         when(categoryService.getActiveCategories()).thenReturn(listResponse);
@@ -95,9 +97,9 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_Success() throws Exception {
-        when(categoryService.getCategoryById(1L)).thenReturn(categoryDto);
+        when(categoryService.getCategoryById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(categoryDto);
 
-        mockMvc.perform(get("/api/categories/1"))
+        mockMvc.perform(get("/api/categories/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.name").value("Electronics"));
@@ -105,7 +107,7 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_NotFound_Returns404() throws Exception {
-        when(categoryService.getCategoryById(99L))
+        when(categoryService.getCategoryById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
                 .thenThrow(new ResourceNotFoundException("Category not found with id: 99"));
 
         mockMvc.perform(get("/api/categories/99"))
@@ -166,10 +168,10 @@ class CategoryControllerTest {
     @Test
     void updateCategory_AsAdmin_Success() throws Exception {
         CategoryDto updateRequest = CategoryDto.builder().name("Updated Electronics").active(true).build();
-        CategoryDto updated = CategoryDto.builder().id(1L).name("Updated Electronics").active(true).build();
-        when(categoryService.updateCategory(anyLong(), any(CategoryDto.class))).thenReturn(updated);
+        CategoryDto updated = CategoryDto.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).name("Updated Electronics").active(true).build();
+        when(categoryService.updateCategory(any(UUID.class), any(CategoryDto.class))).thenReturn(updated);
 
-        mockMvc.perform(put("/api/categories/1")
+        mockMvc.perform(put("/api/categories/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(adminUser))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -180,9 +182,9 @@ class CategoryControllerTest {
 
     @Test
     void deleteCategory_AsAdmin_Success() throws Exception {
-        doNothing().when(categoryService).deleteCategory(1L);
+        doNothing().when(categoryService).deleteCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(delete("/api/categories/1")
+        mockMvc.perform(delete("/api/categories/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(adminUser))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -192,9 +194,9 @@ class CategoryControllerTest {
     @Test
     void deleteCategory_NotFound_Returns404() throws Exception {
         doThrow(new ResourceNotFoundException("Category not found with id: 1"))
-                .when(categoryService).deleteCategory(1L);
+                .when(categoryService).deleteCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(delete("/api/categories/1")
+        mockMvc.perform(delete("/api/categories/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(adminUser))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

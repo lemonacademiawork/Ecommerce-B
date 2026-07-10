@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.AddToCartRequest;
 import com.lemonacademy.ecommerce.dto.CartResponse;
@@ -62,10 +64,10 @@ class CartControllerTest {
 
     @BeforeEach
     void setUp() {
-        customerUser = User.builder().id(1L).email("customer@test.com").role(Role.CUSTOMER).build();
+        customerUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         cartResponse = CartResponse.builder()
-                .cartId(1L)
+                .cartId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .items(Collections.emptyList())
                 .totalAmount(BigDecimal.ZERO)
                 .totalItems(0)
@@ -75,7 +77,7 @@ class CartControllerTest {
     @Test
     void addToCart_Authenticated_Success() throws Exception {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(2);
 
         when(cartService.addToCart(any(AddToCartRequest.class))).thenReturn(cartResponse);
@@ -92,7 +94,7 @@ class CartControllerTest {
     @Test
     void addToCart_Unauthenticated_Returns403() throws Exception {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(2);
 
         mockMvc.perform(post("/api/cart/add")
@@ -105,7 +107,7 @@ class CartControllerTest {
     @Test
     void addToCart_InsufficientStock_Returns400() throws Exception {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(100);
 
         when(cartService.addToCart(any(AddToCartRequest.class)))
@@ -139,7 +141,7 @@ class CartControllerTest {
     @Test
     void updateCartItem_Authenticated_Success() throws Exception {
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(5);
 
         when(cartService.updateCartItem(any(UpdateCartItemRequest.class))).thenReturn(cartResponse);
@@ -154,9 +156,9 @@ class CartControllerTest {
 
     @Test
     void removeCartItem_Authenticated_Success() throws Exception {
-        when(cartService.removeCartItem(1L)).thenReturn(cartResponse);
+        when(cartService.removeCartItem(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(cartResponse);
 
-        mockMvc.perform(delete("/api/cart/remove/1")
+        mockMvc.perform(delete("/api/cart/remove/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -165,10 +167,10 @@ class CartControllerTest {
 
     @Test
     void removeCartItem_NotFound_Returns404() throws Exception {
-        when(cartService.removeCartItem(anyLong()))
+        when(cartService.removeCartItem(any(UUID.class)))
                 .thenThrow(new ResourceNotFoundException("Cart item not found with id: 1"));
 
-        mockMvc.perform(delete("/api/cart/remove/1")
+        mockMvc.perform(delete("/api/cart/remove/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

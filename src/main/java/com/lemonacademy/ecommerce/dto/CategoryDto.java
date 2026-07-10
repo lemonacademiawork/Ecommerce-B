@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryDto {
 
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Category name is required")
     private String name;

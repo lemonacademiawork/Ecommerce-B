@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AddressRequest;
 import com.lemonacademy.ecommerce.dto.AddressResponse;
 import com.lemonacademy.ecommerce.entity.Address;
@@ -70,7 +72,7 @@ public class AddressService {
     }
 
     @Transactional
-    public AddressResponse updateAddress(Long id, AddressRequest request) {
+    public AddressResponse updateAddress(UUID id, AddressRequest request) {
         User user = getAuthenticatedUser();
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
@@ -110,7 +112,7 @@ public class AddressService {
     }
 
     @Transactional
-    public void deleteAddress(Long id) {
+    public void deleteAddress(UUID id) {
         User user = getAuthenticatedUser();
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
@@ -134,7 +136,7 @@ public class AddressService {
     }
 
     @Transactional
-    public AddressResponse setDefaultAddress(Long id) {
+    public AddressResponse setDefaultAddress(UUID id) {
         User user = getAuthenticatedUser();
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));

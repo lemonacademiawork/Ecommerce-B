@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ChangePasswordRequest;
 import com.lemonacademy.ecommerce.dto.UpdateProfileRequest;
 import com.lemonacademy.ecommerce.dto.UserProfileResponse;
@@ -44,7 +46,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         mockUser = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Test User")
                 .email("test@example.com")
                 .phone("+1234567890")
@@ -68,7 +70,7 @@ class UserServiceTest {
         UserProfileResponse profile = userService.getProfile();
 
         assertThat(profile).isNotNull();
-        assertThat(profile.getId()).isEqualTo(1L);
+        assertThat(profile.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         assertThat(profile.getEmail()).isEqualTo("test@example.com");
     }
 
@@ -78,10 +80,10 @@ class UserServiceTest {
         request.setName("Updated Name");
         request.setPhone("+0987654321");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
         
         User updatedUser = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Updated Name")
                 .email("test@example.com")
                 .phone("+0987654321")
@@ -104,7 +106,7 @@ class UserServiceTest {
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setName("Updated Name");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(InvalidOperationException.class, () -> userService.updateProfile(request));
         verify(userRepository, never()).save(any(User.class));
@@ -116,7 +118,7 @@ class UserServiceTest {
         request.setCurrentPassword("currentPassword");
         request.setNewPassword("newPassword");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("currentPassword", "encodedPassword")).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
 
@@ -131,7 +133,7 @@ class UserServiceTest {
         request.setCurrentPassword("wrongPassword");
         request.setNewPassword("newPassword");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
         assertThrows(InvalidOperationException.class, () -> userService.changePassword(request));
@@ -144,7 +146,7 @@ class UserServiceTest {
         request.setCurrentPassword("currentPassword");
         request.setNewPassword("newPassword");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(InvalidOperationException.class, () -> userService.changePassword(request));
         verify(passwordEncoder, never()).matches(anyString(), anyString());

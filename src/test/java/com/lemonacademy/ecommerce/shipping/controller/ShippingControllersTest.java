@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.shipping.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.entity.Order;
 import com.lemonacademy.ecommerce.entity.Role;
@@ -81,11 +83,11 @@ public class ShippingControllersTest {
         mockMvcCustomer = MockMvcBuilders.standaloneSetup(customerController).setControllerAdvice(advice).build();
         mockMvcWebhook = MockMvcBuilders.standaloneSetup(webhookController).setControllerAdvice(advice).build();
 
-        adminUser = User.builder().id(100L).email("admin@example.com").role(Role.ADMIN).build();
-        customerUser = User.builder().id(200L).email("customer@example.com").role(Role.CUSTOMER).build();
+        adminUser = User.builder().id(UUID.fromString("0bbc4ab8-e7c0-3e38-88c8-59fd4801d7b4")).email("admin@example.com").role(Role.ADMIN).build();
+        customerUser = User.builder().id(UUID.fromString("f6b94ab3-a544-3f41-a168-f01ee2e33f09")).email("customer@example.com").role(Role.CUSTOMER).build();
         
         order = Order.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .user(customerUser)
                 .awbNumber("AWB123")
                 .shipmentStatus("BOOKED")
@@ -94,8 +96,8 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminBookShipment() throws Exception {
-        BookShipmentRequest request = new BookShipmentRequest(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        BookShipmentRequest request = new BookShipmentRequest(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(shipmentService.bookShipmentForOrder(any(Order.class))).thenReturn(order);
 
         mockMvcAdmin.perform(post("/api/admin/shipping/book")
@@ -108,8 +110,8 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminCancelShipment() throws Exception {
-        CancelShipmentRequest request = new CancelShipmentRequest(1L);
-        when(shipmentService.cancelShipment(1L)).thenReturn(order);
+        CancelShipmentRequest request = new CancelShipmentRequest(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        when(shipmentService.cancelShipment(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(order);
 
         mockMvcAdmin.perform(post("/api/admin/shipping/cancel")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -150,9 +152,9 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminGenerateLabel() throws Exception {
-        when(labelService.generateLabel(1L)).thenReturn("https://icarry.in/labels/1.pdf");
+        when(labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn("https://icarry.in/labels/1.pdf");
 
-        mockMvcAdmin.perform(get("/api/admin/shipping/label/1"))
+        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("https://icarry.in/labels/1.pdf"));
     }
@@ -179,9 +181,9 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminPickupRequest() throws Exception {
-        when(pickupService.requestPickup(1L)).thenReturn(order);
+        when(pickupService.requestPickup(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(order);
 
-        mockMvcAdmin.perform(post("/api/admin/shipping/pickup/request/1"))
+        mockMvcAdmin.perform(post("/api/admin/shipping/pickup/request/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -206,7 +208,7 @@ public class ShippingControllersTest {
 
     @Test
     void testCustomerTrackOwnShipmentUnauthorized() throws Exception {
-        User otherCustomer = User.builder().id(999L).email("other@example.com").role(Role.CUSTOMER).build();
+        User otherCustomer = User.builder().id(UUID.fromString("08d0a55d-b72b-3fb8-ad6b-1d041bd7e52b")).email("other@example.com").role(Role.CUSTOMER).build();
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 otherCustomer, null, otherCustomer.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);

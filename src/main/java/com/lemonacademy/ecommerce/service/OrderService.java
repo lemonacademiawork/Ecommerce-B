@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -130,7 +132,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrderDetails(Long id) {
+    public OrderResponse getOrderDetails(UUID id) {
         User user = getAuthenticatedUser();
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
@@ -169,7 +171,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updateOrderStatus(Long id, OrderStatus status) {
+    public OrderResponse updateOrderStatus(UUID id, OrderStatus status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 

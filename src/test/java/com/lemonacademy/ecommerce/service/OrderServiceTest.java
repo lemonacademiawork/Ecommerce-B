@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.OrderRequest;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
@@ -69,7 +71,7 @@ class OrderServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .email("test@example.com")
                 .role(Role.CUSTOMER)
                 .build();
@@ -79,14 +81,14 @@ class OrderServiceTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         address = Address.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .user(user)
                 .addressLine1("123 Test St")
                 .city("Test City")
                 .build();
 
         product = Product.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Laptop")
                 .price(new BigDecimal("1000.00"))
                 .stock(10)
@@ -94,27 +96,27 @@ class OrderServiceTest {
                 .build();
 
         cart = Cart.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .user(user)
                 .items(new ArrayList<>())
                 .build();
 
         cartItem = CartItem.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .cart(cart)
                 .product(product)
                 .quantity(2)
                 .build();
 
         order = new Order();
-        order.setId(1L);
+        order.setId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         order.setUser(user);
         order.setAddress(address);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalAmount(new BigDecimal("2000.00"));
         
         OrderItem orderItem = OrderItem.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .order(order)
                 .product(product)
                 .quantity(2)
@@ -133,10 +135,10 @@ class OrderServiceTest {
     void createOrder_Success() {
         cart.getItems().add(cartItem);
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArguments()[0]);
 
         OrderResponse response = orderService.createOrder(request);
@@ -162,10 +164,10 @@ class OrderServiceTest {
     void createOrder_AddressNotFound() {
         cart.getItems().add(cartItem);
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(addressRepository.findById(1L)).thenReturn(Optional.empty());
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> orderService.createOrder(request));
     }
@@ -174,14 +176,14 @@ class OrderServiceTest {
     void createOrder_AddressUnauthorized() {
         cart.getItems().add(cartItem);
         
-        User otherUser = User.builder().id(2L).build();
+        User otherUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).build();
         address.setUser(otherUser);
         
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
 
         assertThrows(UnauthorizedAccessException.class, () -> orderService.createOrder(request));
     }
@@ -192,10 +194,10 @@ class OrderServiceTest {
         cart.getItems().add(cartItem);
         
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
 
         assertThrows(InvalidOperationException.class, () -> orderService.createOrder(request));
     }
@@ -206,10 +208,10 @@ class OrderServiceTest {
         cart.getItems().add(cartItem);
         
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
 
         assertThrows(InsufficientStockException.class, () -> orderService.createOrder(request));
     }
@@ -231,43 +233,43 @@ class OrderServiceTest {
 
     @Test
     void getOrderDetails_Owned_Success() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        OrderResponse response = orderService.getOrderDetails(1L);
+        OrderResponse response = orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(response).isNotNull();
-        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void getOrderDetails_Admin_Success() {
-        User adminUser = User.builder().id(2L).role(Role.ADMIN).build();
+        User adminUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).role(Role.ADMIN).build();
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(adminUser, null, adminUser.getAuthorities()));
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        OrderResponse response = orderService.getOrderDetails(1L);
+        OrderResponse response = orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(response).isNotNull();
     }
 
     @Test
     void getOrderDetails_Unauthorized() {
-        User otherUser = User.builder().id(2L).role(Role.CUSTOMER).build();
+        User otherUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).role(Role.CUSTOMER).build();
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(otherUser, null, otherUser.getAuthorities()));
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        assertThrows(UnauthorizedAccessException.class, () -> orderService.getOrderDetails(1L));
+        assertThrows(UnauthorizedAccessException.class, () -> orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
     void getOrderDetails_NotFound() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.getOrderDetails(1L));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
@@ -282,10 +284,10 @@ class OrderServiceTest {
 
     @Test
     void updateOrderStatus_Success() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        OrderResponse response = orderService.updateOrderStatus(1L, OrderStatus.SHIPPED);
+        OrderResponse response = orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OrderStatus.SHIPPED);
@@ -293,8 +295,8 @@ class OrderServiceTest {
 
     @Test
     void updateOrderStatus_NotFound() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrderStatus(1L, OrderStatus.SHIPPED));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED));
     }
 }

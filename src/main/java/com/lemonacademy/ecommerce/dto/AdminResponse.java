@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminResponse {
-    private Long id;
+    private UUID id;
     private String fullName;
     private String email;
     private String role;

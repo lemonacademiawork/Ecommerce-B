@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AddressRequest;
 import com.lemonacademy.ecommerce.dto.AddressResponse;
 import com.lemonacademy.ecommerce.dto.ApiResponse;
@@ -36,20 +38,20 @@ public class AddressController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody AddressRequest request) {
         AddressResponse response = addressService.updateAddress(id, request);
         return ResponseEntity.ok(ApiResponse.success("Address updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable UUID id) {
         addressService.deleteAddress(id);
         return ResponseEntity.ok(ApiResponse.success("Address deleted successfully", null));
     }
 
     @PutMapping("/{id}/default")
-    public ResponseEntity<ApiResponse<AddressResponse>> setDefaultAddress(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<AddressResponse>> setDefaultAddress(@PathVariable UUID id) {
         AddressResponse response = addressService.setDefaultAddress(id);
         return ResponseEntity.ok(ApiResponse.success("Default address updated successfully", response));
     }

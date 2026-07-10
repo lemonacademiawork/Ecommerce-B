@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.CategoryDto;
 import com.lemonacademy.ecommerce.service.CategoryService;
@@ -32,7 +34,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get category by ID")
-    public ResponseEntity<ApiResponse<CategoryDto>> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CategoryDto>> getCategoryById(@PathVariable UUID id) {
         CategoryDto category = categoryService.getCategoryById(id);
         return ResponseEntity.ok(ApiResponse.success("Category retrieved successfully", category));
     }
@@ -50,7 +52,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update a category (Admin only)")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody CategoryDto categoryDto) {
         CategoryDto updatedCategory = categoryService.updateCategory(id, categoryDto);
         return ResponseEntity.ok(ApiResponse.success("Category updated successfully", updatedCategory));
@@ -59,7 +61,7 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a category (Admin only)")
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
     }

@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.shipping.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.entity.Order;
 import com.lemonacademy.ecommerce.repository.OrderRepository;
@@ -68,7 +70,7 @@ public class AdminShippingController {
 
     @GetMapping("/label/{orderId}")
     @Operation(summary = "Generate/Download shipping label", description = "Requests a printable PDF label URL from iCarry and saves it in the order's database entry.")
-    public ResponseEntity<ApiResponse<String>> generateLabel(@Parameter(description = "The database Order ID") @PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<String>> generateLabel(@Parameter(description = "The database Order ID") @PathVariable UUID orderId) {
         log.info("Admin label generation requested for order ID: {}", orderId);
         String labelUrl = labelService.generateLabel(orderId);
         return ResponseEntity.ok(ApiResponse.success("Label generated successfully", labelUrl));
@@ -84,7 +86,7 @@ public class AdminShippingController {
 
     @PostMapping("/pickup/request/{orderId}")
     @Operation(summary = "Schedule package courier pickup", description = "Dispatches a pickup driver allocation request for the booked shipment's AWB package.")
-    public ResponseEntity<ApiResponse<Order>> requestPickup(@Parameter(description = "The database Order ID") @PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<Order>> requestPickup(@Parameter(description = "The database Order ID") @PathVariable UUID orderId) {
         log.info("Admin scheduling pickup request for order ID: {}", orderId);
         Order updatedOrder = pickupService.requestPickup(orderId);
         return ResponseEntity.ok(ApiResponse.success("Pickup scheduled successfully", updatedOrder));

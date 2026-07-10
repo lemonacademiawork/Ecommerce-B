@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AddToCartRequest;
 import com.lemonacademy.ecommerce.dto.CartResponse;
 import com.lemonacademy.ecommerce.dto.UpdateCartItemRequest;
@@ -58,7 +60,7 @@ class CartServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .email("test@example.com")
                 .role(Role.CUSTOMER)
                 .build();
@@ -68,7 +70,7 @@ class CartServiceTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         product = Product.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Test Product")
                 .price(new BigDecimal("100.00"))
                 .stock(10)
@@ -76,13 +78,13 @@ class CartServiceTest {
                 .build();
 
         cart = Cart.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .user(user)
                 .items(new ArrayList<>())
                 .build();
 
         cartItem = CartItem.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .cart(cart)
                 .product(product)
                 .quantity(2)
@@ -97,10 +99,10 @@ class CartServiceTest {
     @Test
     void addToCart_NewItem_Success() {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(2);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.empty());
 
@@ -113,10 +115,10 @@ class CartServiceTest {
     @Test
     void addToCart_ExistingItem_Success() {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(3);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.of(cartItem));
 
@@ -130,9 +132,9 @@ class CartServiceTest {
     @Test
     void addToCart_ProductNotFound() {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> cartService.addToCart(request));
     }
@@ -141,9 +143,9 @@ class CartServiceTest {
     void addToCart_ProductInactive() {
         product.setActive(false);
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
 
         assertThrows(InvalidOperationException.class, () -> cartService.addToCart(request));
     }
@@ -151,10 +153,10 @@ class CartServiceTest {
     @Test
     void addToCart_InsufficientStock() {
         AddToCartRequest request = new AddToCartRequest();
-        request.setProductId(1L);
+        request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(15); // > 10
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.empty());
 
@@ -187,10 +189,10 @@ class CartServiceTest {
     @Test
     void updateCartItem_Success() {
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(5);
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
         cart.getItems().add(cartItem);
 
         CartResponse response = cartService.updateCartItem(request);
@@ -203,22 +205,22 @@ class CartServiceTest {
     @Test
     void updateCartItem_NotFound() {
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.empty());
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> cartService.updateCartItem(request));
     }
 
     @Test
     void updateCartItem_Unauthorized() {
-        User otherUser = User.builder().id(2L).build();
+        User otherUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).build();
         cart.setUser(otherUser);
 
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
 
         assertThrows(UnauthorizedAccessException.class, () -> cartService.updateCartItem(request));
     }
@@ -226,10 +228,10 @@ class CartServiceTest {
     @Test
     void updateCartItem_InvalidQuantity() {
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(0);
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
 
         assertThrows(InvalidOperationException.class, () -> cartService.updateCartItem(request));
     }
@@ -237,20 +239,20 @@ class CartServiceTest {
     @Test
     void updateCartItem_InsufficientStock() {
         UpdateCartItemRequest request = new UpdateCartItemRequest();
-        request.setCartItemId(1L);
+        request.setCartItemId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(15);
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
 
         assertThrows(InsufficientStockException.class, () -> cartService.updateCartItem(request));
     }
 
     @Test
     void removeCartItem_Success() {
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
         cart.getItems().add(cartItem);
 
-        CartResponse response = cartService.removeCartItem(1L);
+        CartResponse response = cartService.removeCartItem(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(response).isNotNull();
         assertThat(cart.getItems()).isEmpty();
@@ -259,12 +261,12 @@ class CartServiceTest {
 
     @Test
     void removeCartItem_Unauthorized() {
-        User otherUser = User.builder().id(2L).build();
+        User otherUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).build();
         cart.setUser(otherUser);
 
-        when(cartItemRepository.findById(1L)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(cartItem));
 
-        assertThrows(UnauthorizedAccessException.class, () -> cartService.removeCartItem(1L));
+        assertThrows(UnauthorizedAccessException.class, () -> cartService.removeCartItem(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test

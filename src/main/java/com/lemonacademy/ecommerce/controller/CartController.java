@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.*;
 import com.lemonacademy.ecommerce.service.CartService;
 import jakarta.validation.Valid;
@@ -37,7 +39,7 @@ public class CartController {
     }
 
     @DeleteMapping("/remove/{cartItemId}")
-    public ResponseEntity<ApiResponse<CartResponse>> removeCartItem(@PathVariable Long cartItemId) {
+    public ResponseEntity<ApiResponse<CartResponse>> removeCartItem(@PathVariable UUID cartItemId) {
         CartResponse cart = cartService.removeCartItem(cartItemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed from cart", cart));
     }

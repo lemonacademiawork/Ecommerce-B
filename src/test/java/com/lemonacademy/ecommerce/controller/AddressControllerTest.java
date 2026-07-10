@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.AddressResponse;
 import com.lemonacademy.ecommerce.dto.AddressRequest;
@@ -61,10 +63,10 @@ class AddressControllerTest {
 
     @BeforeEach
     void setUp() {
-        customerUser = User.builder().id(1L).email("customer@test.com").role(Role.CUSTOMER).build();
+        customerUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         addressResponse = AddressResponse.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .fullName("John Doe")
                 .addressLine1("123 Main St")
                 .city("TestCity")
@@ -113,9 +115,9 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_Authenticated_Success() throws Exception {
-        when(addressService.updateAddress(anyLong(), any(AddressRequest.class))).thenReturn(addressResponse);
+        when(addressService.updateAddress(any(UUID.class), any(AddressRequest.class))).thenReturn(addressResponse);
 
-        mockMvc.perform(put("/api/addresses/1")
+        mockMvc.perform(put("/api/addresses/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -126,10 +128,10 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_Unauthorized_Returns403() throws Exception {
-        when(addressService.updateAddress(anyLong(), any(AddressRequest.class)))
+        when(addressService.updateAddress(any(UUID.class), any(AddressRequest.class)))
                 .thenThrow(new UnauthorizedAccessException("You are not authorized to update this address"));
 
-        mockMvc.perform(put("/api/addresses/1")
+        mockMvc.perform(put("/api/addresses/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -139,9 +141,9 @@ class AddressControllerTest {
 
     @Test
     void deleteAddress_Authenticated_Success() throws Exception {
-        doNothing().when(addressService).deleteAddress(1L);
+        doNothing().when(addressService).deleteAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(delete("/api/addresses/1")
+        mockMvc.perform(delete("/api/addresses/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -151,9 +153,9 @@ class AddressControllerTest {
     @Test
     void deleteAddress_NotFound_Returns404() throws Exception {
         doThrow(new ResourceNotFoundException("Address not found with id: 1"))
-                .when(addressService).deleteAddress(1L);
+                .when(addressService).deleteAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(delete("/api/addresses/1")
+        mockMvc.perform(delete("/api/addresses/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(customerUser))
                         .with(csrf()))
                 .andExpect(status().isNotFound());
@@ -161,7 +163,7 @@ class AddressControllerTest {
 
     @Test
     void setDefaultAddress_Authenticated_Success() throws Exception {
-        when(addressService.setDefaultAddress(1L)).thenReturn(addressResponse);
+        when(addressService.setDefaultAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(addressResponse);
 
         mockMvc.perform(put("/api/addresses/1/default")
                         .with(user(customerUser))

@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AddressResponse {
 
-    private Long id;
+    private UUID id;
     private String fullName;
     private String phone;
     private String addressLine1;

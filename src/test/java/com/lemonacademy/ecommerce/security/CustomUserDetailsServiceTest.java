@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.security;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.entity.Role;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.repository.UserRepository;
@@ -33,7 +35,7 @@ class CustomUserDetailsServiceTest {
     @BeforeEach
     void setUp() {
         mockUser = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Test User")
                 .email("test@example.com")
                 .password("password")

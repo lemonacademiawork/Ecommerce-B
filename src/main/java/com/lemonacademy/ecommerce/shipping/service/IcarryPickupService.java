@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.shipping.service;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.entity.Order;
@@ -69,7 +71,7 @@ public class IcarryPickupService {
     }
 
     @Transactional
-    public Order requestPickup(Long orderId) {
+    public Order requestPickup(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 

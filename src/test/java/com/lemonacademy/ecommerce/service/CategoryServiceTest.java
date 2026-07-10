@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.CategoryDto;
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.entity.Category;
@@ -41,14 +43,14 @@ class CategoryServiceTest {
     @BeforeEach
     void setUp() {
         category = Category.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Electronics")
                 .imageUrl("http://example.com/electronics.jpg")
                 .active(true)
                 .build();
 
         categoryDto = CategoryDto.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Electronics")
                 .imageUrl("http://example.com/electronics.jpg")
                 .active(true)
@@ -78,19 +80,19 @@ class CategoryServiceTest {
 
     @Test
     void getCategoryById_Success() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
 
-        CategoryDto result = categoryService.getCategoryById(1L);
+        CategoryDto result = categoryService.getCategoryById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void getCategoryById_NotFound() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
@@ -121,11 +123,11 @@ class CategoryServiceTest {
                 .active(false)
                 .build();
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(categoryRepository.existsByNameAndIdNot(anyString(), anyLong())).thenReturn(false);
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameAndIdNot(anyString(), any(UUID.class))).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        CategoryDto result = categoryService.updateCategory(1L, updateDto);
+        CategoryDto result = categoryService.updateCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), updateDto);
 
         assertThat(result.getName()).isEqualTo("New Electronics");
         assertThat(result.getImageUrl()).isEqualTo("http://example.com/new.jpg");
@@ -135,35 +137,35 @@ class CategoryServiceTest {
 
     @Test
     void updateCategory_NotFound() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.updateCategory(1L, categoryDto));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.updateCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), categoryDto));
         verify(categoryRepository, never()).save(any(Category.class));
     }
 
     @Test
     void updateCategory_DuplicateName() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(categoryRepository.existsByNameAndIdNot(anyString(), anyLong())).thenReturn(true);
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameAndIdNot(anyString(), any(UUID.class))).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(1L, categoryDto));
+        assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), categoryDto));
         verify(categoryRepository, never()).save(any(Category.class));
     }
 
     @Test
     void deleteCategory_Success() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
 
-        categoryService.deleteCategory(1L);
+        categoryService.deleteCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         verify(categoryRepository, times(1)).delete(category);
     }
 
     @Test
     void deleteCategory_NotFound() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategory(1L));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
         verify(categoryRepository, never()).delete(any(Category.class));
     }
 }

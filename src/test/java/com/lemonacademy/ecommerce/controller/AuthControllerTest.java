@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.AuthResponse;
 import com.lemonacademy.ecommerce.dto.LoginRequest;
@@ -69,7 +71,7 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        User user = User.builder().id(1L).name("Test User").email("test@example.com").role(Role.CUSTOMER).active(true).build();
+        User user = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).name("Test User").email("test@example.com").role(Role.CUSTOMER).active(true).build();
         when(authService.register(any(RegisterRequest.class))).thenReturn(user);
 
         mockMvc.perform(post("/api/auth/register")
@@ -88,7 +90,7 @@ class AuthControllerTest {
                 .phone("+1234567890")
                 .build();
 
-        User user = User.builder().id(2L).name("Phone User").phone("+1234567890").role(Role.CUSTOMER).active(false).build();
+        User user = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).name("Phone User").phone("+1234567890").role(Role.CUSTOMER).active(false).build();
         when(authService.register(any(RegisterRequest.class))).thenReturn(user);
 
         mockMvc.perform(post("/api/auth/register")
@@ -245,7 +247,7 @@ class AuthControllerTest {
     @Test
     void endpoint_Authenticated_Forbidden_Returns403() throws Exception {
         // Hitting an admin route authenticated as CUSTOMER should return 403 Forbidden
-        User customerUser = User.builder().id(3L).email("customer@test.com").role(Role.CUSTOMER).active(true).build();
+        User customerUser = User.builder().id(UUID.fromString("03655f29-2310-34f7-9632-9ccf2bd9152c")).email("customer@test.com").role(Role.CUSTOMER).active(true).build();
         mockMvc.perform(get("/api/admin/dashboard")
                         .with(user(customerUser)))
                 .andExpect(status().isForbidden());

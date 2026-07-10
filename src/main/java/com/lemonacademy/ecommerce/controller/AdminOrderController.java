@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
 import com.lemonacademy.ecommerce.dto.OrderStatusRequest;
@@ -27,14 +29,14 @@ public class AdminOrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable UUID id) {
         OrderResponse response = orderService.getOrderDetails(id);
         return ResponseEntity.ok(ApiResponse.success("Order details retrieved successfully", response));
     }
 
     @PutMapping("/{id}/status")
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody OrderStatusRequest request) {
         OrderResponse response = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("Order status updated successfully", response));

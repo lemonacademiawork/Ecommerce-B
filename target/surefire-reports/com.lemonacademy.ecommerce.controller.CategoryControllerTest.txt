@@ -1,0 +1,40 @@
+-------------------------------------------------------------------------------
+Test set: com.lemonacademy.ecommerce.controller.CategoryControllerTest
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.576 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.CategoryControllerTest
+com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_Success -- Time elapsed: 0.008 s <<< FAILURE!
+java.lang.AssertionError: At JSON path "$.data.id", value <23db3d7a-683b-372b-8036-95da3ae5c542> of type <java.lang.String> cannot be converted to type <java.lang.Integer>
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:120)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_Success(CategoryControllerTest.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: com.jayway.jsonpath.spi.mapper.MappingException: java.lang.NumberFormatException: For input string: "23db3d7a-683b-372b-8036-95da3ae5c542"
+	at com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider.map(JsonSmartMappingProvider.java:87)
+	at com.jayway.jsonpath.internal.JsonContext.convert(JsonContext.java:117)
+	at com.jayway.jsonpath.internal.JsonContext.read(JsonContext.java:82)
+	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:316)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:113)
+	... 6 more
+Caused by: java.lang.NumberFormatException: For input string: "23db3d7a-683b-372b-8036-95da3ae5c542"
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
+	at java.base/java.lang.Integer.valueOf(Integer.java:989)
+	at com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider$IntegerReader.convert(JsonSmartMappingProvider.java:127)
+	at com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider$IntegerReader.convert(JsonSmartMappingProvider.java:108)
+	at com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider.map(JsonSmartMappingProvider.java:82)
+	... 10 more
+
+com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_NotFound_Returns404 -- Time elapsed: 0.006 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<404> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_NotFound_Returns404(CategoryControllerTest.java:114)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

@@ -31,21 +31,21 @@ class DashboardServiceTest {
 
     @Test
     void getDashboardStatistics_Success() {
-        when(userRepository.count()).thenReturn(100L);
-        when(productRepository.count()).thenReturn(50L);
-        when(orderRepository.count()).thenReturn(200L);
-        when(orderRepository.countByStatus(OrderStatus.PENDING)).thenReturn(20L);
-        when(orderRepository.countByStatus(OrderStatus.DELIVERED)).thenReturn(150L);
-        when(orderRepository.countByStatus(OrderStatus.CANCELLED)).thenReturn(30L);
+        when(userRepository.count()).thenReturn(10L);
+        when(productRepository.count()).thenReturn(25L);
+        when(orderRepository.count()).thenReturn(50L);
+        when(orderRepository.countByStatus(OrderStatus.PENDING)).thenReturn(5L);
+        when(orderRepository.countByStatus(OrderStatus.DELIVERED)).thenReturn(30L);
+        when(orderRepository.countByStatus(OrderStatus.CANCELLED)).thenReturn(3L);
 
         DashboardResponse response = dashboardService.getDashboardStatistics();
 
         assertThat(response).isNotNull();
-        assertThat(response.getTotalUsers()).isEqualTo(100L);
-        assertThat(response.getTotalProducts()).isEqualTo(50L);
-        assertThat(response.getTotalOrders()).isEqualTo(200L);
-        assertThat(response.getPendingOrders()).isEqualTo(20L);
-        assertThat(response.getDeliveredOrders()).isEqualTo(150L);
-        assertThat(response.getCancelledOrders()).isEqualTo(30L);
+        assertThat(response.getTotalUsers()).isEqualTo(10L);
+        assertThat(response.getTotalProducts()).isEqualTo(25L);
+        assertThat(response.getTotalOrders()).isEqualTo(50L);
+        assertThat(response.getPendingOrders()).isEqualTo(5L);
+        assertThat(response.getDeliveredOrders()).isEqualTo(30L);
+        assertThat(response.getCancelledOrders()).isEqualTo(3L);
     }
 }

@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.ImageUploadResponse;
 import com.lemonacademy.ecommerce.entity.Role;
@@ -52,8 +54,8 @@ class AdminProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        adminUser = User.builder().id(1L).email("admin@test.com").role(Role.ADMIN).build();
-        customerUser = User.builder().id(2L).email("customer@test.com").role(Role.CUSTOMER).build();
+        adminUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("admin@test.com").role(Role.ADMIN).build();
+        customerUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).email("customer@test.com").role(Role.CUSTOMER).build();
     }
 
     @Test

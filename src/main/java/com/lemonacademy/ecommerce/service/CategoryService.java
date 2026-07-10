@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.CategoryDto;
 import com.lemonacademy.ecommerce.entity.Category;
 import com.lemonacademy.ecommerce.exception.ResourceNotFoundException;
@@ -32,7 +34,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public CategoryDto getCategoryById(Long id) {
+    public CategoryDto getCategoryById(UUID id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         return convertToDto(category);
@@ -55,7 +57,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
+    public CategoryDto updateCategory(UUID id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
@@ -74,7 +76,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public void deleteCategory(Long id) {
+    public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         categoryRepository.delete(category);

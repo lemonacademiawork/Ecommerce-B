@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +15,8 @@ import java.math.BigDecimal;
 @Builder
 public class CartItemResponse {
 
-    private Long cartItemId;
-    private Long productId;
+    private UUID cartItemId;
+    private UUID productId;
     private String productName;
     private String imageUrl;
     private BigDecimal price;

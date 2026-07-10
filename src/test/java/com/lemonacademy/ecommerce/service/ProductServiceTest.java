@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
 import com.lemonacademy.ecommerce.dto.ProductResponseDto;
@@ -49,13 +51,13 @@ class ProductServiceTest {
     @BeforeEach
     void setUp() {
         category = Category.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Electronics")
                 .active(true)
                 .build();
 
         product = Product.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Laptop")
                 .description("Gaming Laptop")
                 .price(new BigDecimal("1500.00"))
@@ -72,7 +74,7 @@ class ProductServiceTest {
         productRequestDto.setStock(10);
         productRequestDto.setImageUrl("http://example.com/laptop.jpg");
         productRequestDto.setActive(true);
-        productRequestDto.setCategoryId(1L);
+        productRequestDto.setCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
@@ -98,27 +100,27 @@ class ProductServiceTest {
 
     @Test
     void getProductById_Success() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
 
-        ProductResponseDto result = productService.getProductById(1L);
+        ProductResponseDto result = productService.getProductById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void getProductById_NotFound() {
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
     void getProductsByCategory_Success() {
-        when(categoryRepository.existsById(1L)).thenReturn(true);
-        when(productRepository.findAllByCategoryId(1L)).thenReturn(Collections.singletonList(product));
+        when(categoryRepository.existsById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(true);
+        when(productRepository.findAllByCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Collections.singletonList(product));
 
-        java.util.List<ProductResponseDto> response = productService.getProductsByCategory(1L);
+        java.util.List<ProductResponseDto> response = productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(response).isNotNull();
         assertThat(response).hasSize(1);
@@ -126,9 +128,9 @@ class ProductServiceTest {
 
     @Test
     void getProductsByCategory_CategoryNotFound() {
-        when(categoryRepository.existsById(1L)).thenReturn(false);
+        when(categoryRepository.existsById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.getProductsByCategory(1L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
@@ -153,7 +155,7 @@ class ProductServiceTest {
 
     @Test
     void createProduct_Success() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         ProductResponseDto result = productService.createProduct(productRequestDto);
@@ -165,7 +167,7 @@ class ProductServiceTest {
 
     @Test
     void createProduct_CategoryNotFound() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> productService.createProduct(productRequestDto));
         verify(productRepository, never()).save(any(Product.class));
@@ -173,12 +175,12 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_Success() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
+        when(categoryRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(category));
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArguments()[0]);
 
         productRequestDto.setName("Updated Laptop");
-        ProductResponseDto result = productService.updateProduct(1L, productRequestDto);
+        ProductResponseDto result = productService.updateProduct(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), productRequestDto);
 
         assertThat(result.getName()).isEqualTo("Updated Laptop");
         verify(productRepository, times(1)).save(any(Product.class));
@@ -186,17 +188,17 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_ProductNotFound() {
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.updateProduct(1L, productRequestDto));
+        assertThrows(ResourceNotFoundException.class, () -> productService.updateProduct(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), productRequestDto));
         verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void deleteProduct_Success() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
 
-        productService.deleteProduct(1L);
+        productService.deleteProduct(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         verify(productRepository, times(1)).delete(product);
     }

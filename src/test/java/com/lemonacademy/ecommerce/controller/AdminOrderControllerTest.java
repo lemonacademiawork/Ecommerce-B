@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
 import com.lemonacademy.ecommerce.dto.OrderStatusRequest;
@@ -65,12 +67,12 @@ class AdminOrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        adminUser = User.builder().id(1L).email("admin@test.com").role(Role.ADMIN).build();
-        customerUser = User.builder().id(2L).email("customer@test.com").role(Role.CUSTOMER).build();
+        adminUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("admin@test.com").role(Role.ADMIN).build();
+        customerUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         orderResponse = OrderResponse.builder()
-                .id(1L)
-                .userId(2L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .userId(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf"))
                 .totalAmount(new BigDecimal("2000.00"))
                 .status(OrderStatus.PENDING)
                 .items(Collections.emptyList())
@@ -103,9 +105,9 @@ class AdminOrderControllerTest {
 
     @Test
     void getOrderDetails_AsAdmin_Success() throws Exception {
-        when(orderService.getOrderDetails(1L)).thenReturn(orderResponse);
+        when(orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(orderResponse);
 
-        mockMvc.perform(get("/api/admin/orders/1").with(user(adminUser)))
+        mockMvc.perform(get("/api/admin/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(adminUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.status").value("PENDING"));
@@ -113,7 +115,7 @@ class AdminOrderControllerTest {
 
     @Test
     void getOrderDetails_NotFound_Returns404() throws Exception {
-        when(orderService.getOrderDetails(anyLong()))
+        when(orderService.getOrderDetails(any(UUID.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
 
         mockMvc.perform(get("/api/admin/orders/99").with(user(adminUser)))
@@ -126,12 +128,12 @@ class AdminOrderControllerTest {
         request.setStatus(OrderStatus.SHIPPED);
 
         OrderResponse shippedOrder = OrderResponse.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .status(OrderStatus.SHIPPED)
                 .items(Collections.emptyList())
                 .build();
 
-        when(orderService.updateOrderStatus(1L, OrderStatus.SHIPPED)).thenReturn(shippedOrder);
+        when(orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED)).thenReturn(shippedOrder);
 
         mockMvc.perform(put("/api/admin/orders/1/status")
                         .with(user(adminUser))
@@ -161,7 +163,7 @@ class AdminOrderControllerTest {
         OrderStatusRequest request = new OrderStatusRequest();
         request.setStatus(OrderStatus.SHIPPED);
 
-        when(orderService.updateOrderStatus(anyLong(), any(OrderStatus.class)))
+        when(orderService.updateOrderStatus(any(UUID.class), any(OrderStatus.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
 
         mockMvc.perform(put("/api/admin/orders/99/status")

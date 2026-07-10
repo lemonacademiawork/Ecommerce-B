@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,7 @@ import java.util.List;
 @Builder
 public class CartResponse {
 
-    private Long cartId;
+    private UUID cartId;
     private List<CartItemResponse> items;
     private BigDecimal totalAmount;
     private Integer totalItems;

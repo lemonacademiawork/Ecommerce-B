@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class OrderRequest {
 
     @NotNull(message = "Address ID is required")
-    private Long addressId;
+    private UUID addressId;
 }

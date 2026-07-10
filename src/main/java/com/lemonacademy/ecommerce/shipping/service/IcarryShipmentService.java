@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.shipping.service;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.entity.Address;
@@ -148,7 +150,7 @@ public class IcarryShipmentService {
     }
 
     @Transactional
-    public Order cancelShipment(Long orderId) {
+    public Order cancelShipment(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 

@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ProductResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
 import com.lemonacademy.ecommerce.entity.Category;
@@ -37,14 +39,14 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDto getProductById(Long id) {
+    public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return convertToDto(product);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
+    public List<ProductResponseDto> getProductsByCategory(UUID categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
@@ -54,7 +56,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getActiveProductsByCategory(Long categoryId) {
+    public List<ProductResponseDto> getActiveProductsByCategory(UUID categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
@@ -93,7 +95,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDto updateProduct(Long id, ProductRequestDto dto) {
+    public ProductResponseDto updateProduct(UUID id, ProductRequestDto dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
@@ -115,7 +117,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         productRepository.delete(product);

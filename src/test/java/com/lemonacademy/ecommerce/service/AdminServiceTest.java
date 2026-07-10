@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AdminAuthResponse;
 import com.lemonacademy.ecommerce.dto.AdminLoginRequest;
 import com.lemonacademy.ecommerce.entity.Admin;
@@ -44,7 +46,7 @@ class AdminServiceTest {
     @BeforeEach
     void setUp() {
         mockAdmin = Admin.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .fullName("Test Admin")
                 .email("admin@test.com")
                 .password("encodedPassword")

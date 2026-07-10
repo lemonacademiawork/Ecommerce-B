@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,5 +36,5 @@ public class ProductRequestDto {
     private Boolean active;
 
     @NotNull(message = "Category ID is required")
-    private Long categoryId;
+    private UUID categoryId;
 }

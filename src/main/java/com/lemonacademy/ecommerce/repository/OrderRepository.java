@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.repository;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.entity.Order;
 import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.entity.OrderStatus;
@@ -11,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByUserOrderByCreatedAtDesc(User user);
     Page<Order> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
     List<Order> findAllByOrderByCreatedAtDesc();

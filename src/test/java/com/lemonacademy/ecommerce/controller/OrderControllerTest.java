@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.OrderRequest;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
@@ -65,11 +67,11 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        customerUser = User.builder().id(1L).email("customer@test.com").role(Role.CUSTOMER).build();
+        customerUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         orderResponse = OrderResponse.builder()
-                .id(1L)
-                .userId(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .userId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .totalAmount(new BigDecimal("2000.00"))
                 .status(OrderStatus.PENDING)
                 .items(Collections.emptyList())
@@ -81,7 +83,7 @@ class OrderControllerTest {
     @Test
     void createOrder_Authenticated_Success() throws Exception {
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(orderService.createOrder(any(OrderRequest.class))).thenReturn(orderResponse);
 
@@ -98,7 +100,7 @@ class OrderControllerTest {
     @Test
     void createOrder_EmptyCart_Returns400() throws Exception {
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(orderService.createOrder(any(OrderRequest.class)))
                 .thenThrow(new InvalidOperationException("Cart is empty"));
@@ -114,7 +116,7 @@ class OrderControllerTest {
     @Test
     void createOrder_Unauthenticated_Returns403() throws Exception {
         OrderRequest request = new OrderRequest();
-        request.setAddressId(1L);
+        request.setAddressId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         mockMvc.perform(post("/api/orders")
                         .with(csrf())
@@ -150,16 +152,16 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetails_Authenticated_Success() throws Exception {
-        when(orderService.getOrderDetails(1L)).thenReturn(orderResponse);
+        when(orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(orderResponse);
 
-        mockMvc.perform(get("/api/orders/1").with(user(customerUser)))
+        mockMvc.perform(get("/api/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(customerUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1));
     }
 
     @Test
     void getOrderDetails_NotFound_Returns404() throws Exception {
-        when(orderService.getOrderDetails(anyLong()))
+        when(orderService.getOrderDetails(any(UUID.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
 
         mockMvc.perform(get("/api/orders/99").with(user(customerUser)))

@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.ProductResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
@@ -23,7 +25,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProducts(
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "categoryId", required = false) UUID categoryId,
             @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
         
         List<ProductResponseDto> products;
@@ -60,14 +62,14 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> getProductById(@PathVariable UUID id) {
         ProductResponseDto product = productService.getProductById(id);
         return ResponseEntity.ok(ApiResponse.success("Product retrieved successfully", product));
     }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProductsByCategory(
-            @PathVariable Long categoryId,
+            @PathVariable UUID categoryId,
             @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
         List<ProductResponseDto> products = all 
                 ? productService.getProductsByCategory(categoryId) 
@@ -86,7 +88,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody ProductRequestDto requestDto) {
         ProductResponseDto updatedProduct = productService.updateProduct(id, requestDto);
         return ResponseEntity.ok(ApiResponse.success("Product updated successfully", updatedProduct));
@@ -94,7 +96,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", null));
     }

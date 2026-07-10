@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 
 @SpringBootApplication(exclude = {
-    RedisAutoConfiguration.class,
-    RedisRepositoriesAutoConfiguration.class
+        RedisAutoConfiguration.class,
+        RedisRepositoriesAutoConfiguration.class
 })
 public class EcommerceApplication {
 

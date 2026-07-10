@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.AddressRequest;
 import com.lemonacademy.ecommerce.dto.AddressResponse;
 import com.lemonacademy.ecommerce.entity.Address;
@@ -44,7 +46,7 @@ class AddressServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .email("test@example.com")
                 .role(Role.CUSTOMER)
                 .build();
@@ -54,7 +56,7 @@ class AddressServiceTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         address = Address.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .user(user)
                 .fullName("John Doe")
                 .addressLine1("123 Main St")
@@ -89,7 +91,7 @@ class AddressServiceTest {
 
     @Test
     void addAddress_NotFirst_RequestDefault() {
-        Address existingAddress = Address.builder().id(2L).isDefault(true).build();
+        Address existingAddress = Address.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).isDefault(true).build();
         List<Address> existingAddresses = new ArrayList<>();
         existingAddresses.add(existingAddress);
 
@@ -115,11 +117,11 @@ class AddressServiceTest {
 
     @Test
     void updateAddress_Success() {
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(addressRepository.save(any(Address.class))).thenAnswer(i -> i.getArguments()[0]);
 
         request.setCity("New City");
-        AddressResponse response = addressService.updateAddress(1L, request);
+        AddressResponse response = addressService.updateAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), request);
 
         assertThat(response.getCity()).isEqualTo("New City");
     }
@@ -129,13 +131,13 @@ class AddressServiceTest {
         address.setIsDefault(false);
         request.setIsDefault(true);
 
-        Address otherAddress = Address.builder().id(2L).isDefault(true).build();
+        Address otherAddress = Address.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).isDefault(true).build();
         
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(addressRepository.findByUser(user)).thenReturn(Collections.singletonList(otherAddress));
         when(addressRepository.save(any(Address.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        AddressResponse response = addressService.updateAddress(1L, request);
+        AddressResponse response = addressService.updateAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), request);
 
         assertThat(response.getIsDefault()).isTrue();
         assertThat(otherAddress.getIsDefault()).isFalse();
@@ -143,41 +145,41 @@ class AddressServiceTest {
 
     @Test
     void updateAddress_NotFound() {
-        when(addressRepository.findById(1L)).thenReturn(Optional.empty());
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> addressService.updateAddress(1L, request));
+        assertThrows(ResourceNotFoundException.class, () -> addressService.updateAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), request));
     }
 
     @Test
     void updateAddress_Unauthorized() {
-        User otherUser = User.builder().id(2L).build();
+        User otherUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).build();
         address.setUser(otherUser);
         
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
 
-        assertThrows(UnauthorizedAccessException.class, () -> addressService.updateAddress(1L, request));
+        assertThrows(UnauthorizedAccessException.class, () -> addressService.updateAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), request));
     }
 
     @Test
     void deleteAddress_Success() {
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(addressRepository.findByUser(user)).thenReturn(Collections.emptyList());
 
-        addressService.deleteAddress(1L);
+        addressService.deleteAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         verify(addressRepository, times(1)).delete(address);
     }
 
     @Test
     void deleteAddress_WasDefault_AssignNewDefault() {
-        Address remainingAddress = Address.builder().id(2L).isDefault(false).build();
+        Address remainingAddress = Address.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).isDefault(false).build();
         List<Address> remaining = new ArrayList<>();
         remaining.add(remainingAddress);
 
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(addressRepository.findByUser(user)).thenReturn(remaining);
 
-        addressService.deleteAddress(1L);
+        addressService.deleteAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         verify(addressRepository, times(1)).delete(address);
         assertThat(remainingAddress.getIsDefault()).isTrue();
@@ -186,21 +188,21 @@ class AddressServiceTest {
 
     @Test
     void deleteAddress_NotFound() {
-        when(addressRepository.findById(1L)).thenReturn(Optional.empty());
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> addressService.deleteAddress(1L));
+        assertThrows(ResourceNotFoundException.class, () -> addressService.deleteAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 
     @Test
     void setDefaultAddress_Success() {
         address.setIsDefault(false);
-        Address oldDefault = Address.builder().id(2L).isDefault(true).build();
+        Address oldDefault = Address.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).isDefault(true).build();
 
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(address));
         when(addressRepository.findByUser(user)).thenReturn(Collections.singletonList(oldDefault));
         when(addressRepository.save(any(Address.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        AddressResponse response = addressService.setDefaultAddress(1L);
+        AddressResponse response = addressService.setDefaultAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         assertThat(response.getIsDefault()).isTrue();
         assertThat(oldDefault.getIsDefault()).isFalse();

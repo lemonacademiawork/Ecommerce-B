@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
@@ -67,19 +69,19 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         productResponseDto = ProductResponseDto.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Laptop")
                 .description("Gaming Laptop")
                 .price(new BigDecimal("1500.00"))
                 .stock(10)
                 .active(true)
-                .categoryId(1L)
+                .categoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .categoryName("Electronics")
                 .build();
 
         listResponse = Collections.singletonList(productResponseDto);
 
-        adminUser = User.builder().id(1L).email("admin@test.com").role(Role.ADMIN).build();
+        adminUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("admin@test.com").role(Role.ADMIN).build();
     }
 
     @Test
@@ -103,7 +105,7 @@ class ProductControllerTest {
 
     @Test
     void getProducts_ByCategory_Success() throws Exception {
-        when(productService.getActiveProductsByCategory(anyLong())).thenReturn(listResponse);
+        when(productService.getActiveProductsByCategory(any(UUID.class))).thenReturn(listResponse);
 
         mockMvc.perform(get("/api/products?categoryId=1"))
                 .andExpect(status().isOk())
@@ -139,9 +141,9 @@ class ProductControllerTest {
 
     @Test
     void getProductById_Success() throws Exception {
-        when(productService.getProductById(1L)).thenReturn(productResponseDto);
+        when(productService.getProductById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(productResponseDto);
 
-        mockMvc.perform(get("/api/products/1"))
+        mockMvc.perform(get("/api/products/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.name").value("Laptop"));
@@ -149,7 +151,7 @@ class ProductControllerTest {
 
     @Test
     void getProductById_NotFound_Returns404() throws Exception {
-        when(productService.getProductById(99L))
+        when(productService.getProductById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
                 .thenThrow(new ResourceNotFoundException("Product not found with id: 99"));
 
         mockMvc.perform(get("/api/products/99"))
@@ -158,9 +160,9 @@ class ProductControllerTest {
 
     @Test
     void getProductsByCategory_Success() throws Exception {
-        when(productService.getActiveProductsByCategory(anyLong())).thenReturn(listResponse);
+        when(productService.getActiveProductsByCategory(any(UUID.class))).thenReturn(listResponse);
 
-        mockMvc.perform(get("/api/products/category/1"))
+        mockMvc.perform(get("/api/products/category/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].name").value("Laptop"));
     }
@@ -171,7 +173,7 @@ class ProductControllerTest {
         request.setName("Laptop");
         request.setPrice(new BigDecimal("1500.00"));
         request.setStock(10);
-        request.setCategoryId(1L);
+        request.setCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         when(productService.createProduct(any(ProductRequestDto.class))).thenReturn(productResponseDto);
 
@@ -190,7 +192,7 @@ class ProductControllerTest {
         request.setName("Laptop");
         request.setPrice(new BigDecimal("1500.00"));
         request.setStock(10);
-        request.setCategoryId(1L);
+        request.setCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         mockMvc.perform(post("/api/products")
                         .with(csrf())
@@ -205,11 +207,11 @@ class ProductControllerTest {
         request.setName("Updated Laptop");
         request.setPrice(new BigDecimal("1200.00"));
         request.setStock(5);
-        request.setCategoryId(1L);
+        request.setCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        when(productService.updateProduct(anyLong(), any(ProductRequestDto.class))).thenReturn(productResponseDto);
+        when(productService.updateProduct(any(UUID.class), any(ProductRequestDto.class))).thenReturn(productResponseDto);
 
-        mockMvc.perform(put("/api/products/1")
+        mockMvc.perform(put("/api/products/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(adminUser))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -219,9 +221,9 @@ class ProductControllerTest {
 
     @Test
     void deleteProduct_AsAdmin_Success() throws Exception {
-        doNothing().when(productService).deleteProduct(1L);
+        doNothing().when(productService).deleteProduct(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(delete("/api/products/1")
+        mockMvc.perform(delete("/api/products/23db3d7a-683b-372b-8036-95da3ae5c542")
                         .with(user(adminUser))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -230,7 +232,7 @@ class ProductControllerTest {
 
     @Test
     void deleteProduct_NotFound_Returns404() throws Exception {
-        when(productService.getProductById(99L))
+        when(productService.getProductById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
                 .thenThrow(new ResourceNotFoundException("Product not found with id: 99"));
 
         mockMvc.perform(get("/api/products/99"))

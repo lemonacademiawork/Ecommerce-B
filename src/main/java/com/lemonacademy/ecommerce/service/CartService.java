@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.dto.*;
 import com.lemonacademy.ecommerce.entity.Cart;
 import com.lemonacademy.ecommerce.entity.CartItem;
@@ -143,7 +145,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponse removeCartItem(Long cartItemId) {
+    public CartResponse removeCartItem(UUID cartItemId) {
         User user = getAuthenticatedUser();
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)

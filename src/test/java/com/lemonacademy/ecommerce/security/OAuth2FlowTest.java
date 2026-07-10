@@ -1,5 +1,7 @@
 package com.lemonacademy.ecommerce.security;
 
+import java.util.UUID;
+
 import com.lemonacademy.ecommerce.entity.AuthProvider;
 import com.lemonacademy.ecommerce.entity.Role;
 import com.lemonacademy.ecommerce.entity.User;
@@ -78,7 +80,7 @@ class OAuth2FlowTest {
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-123");
 
         User existingUser = User.builder()
-                .id(1L)
+                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .email("existing@test.com")
                 .name("Existing User")
                 .provider(AuthProvider.LOCAL)
