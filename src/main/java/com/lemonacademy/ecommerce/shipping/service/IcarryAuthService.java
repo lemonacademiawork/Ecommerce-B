@@ -79,6 +79,21 @@ public class IcarryAuthService {
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(map)
                     .retrieve()
+                    .onStatus(
+                            status -> status.is4xxClientError() || status.is5xxServerError(),
+                            (req, resp) -> {
+                                int code = resp.getStatusCode().value();
+                                String body;
+                                try {
+                                    body = new String(resp.getBody().readAllBytes());
+                                } catch (Exception ex) {
+                                    body = resp.getStatusCode().toString();
+                                }
+                                String truncated = body.length() > 300 ? body.substring(0, 300) + "...[truncated]" : body;
+                                log.error("iCarry login HTTP error {}: {}", code, truncated);
+                                throw new IcarryApiException(
+                                        "iCarry authentication returned HTTP " + code, code);
+                            })
                     .toEntity(String.class);
             long duration = System.currentTimeMillis() - startTime;
             

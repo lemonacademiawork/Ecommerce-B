@@ -65,8 +65,11 @@ public class IcarryLabelService {
             orderRepository.save(order);
 
             return url;
-        } catch (Exception e) {
+        } catch (IcarryApiException e) {
             log.error("Failed to generate label for order {}: {}", orderId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error generating label for order {}: {}", orderId, e.getMessage());
             throw new IcarryApiException("Label API failed: " + e.getMessage(), 500, e);
         }
     }

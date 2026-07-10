@@ -6,6 +6,7 @@ import com.lemonacademy.ecommerce.shipping.client.IcarryClient;
 import com.lemonacademy.ecommerce.shipping.config.IcarryConfig;
 import com.lemonacademy.ecommerce.shipping.dto.CourierEstimateResponse;
 import com.lemonacademy.ecommerce.shipping.dto.ShippingEstimateRequest;
+import com.lemonacademy.ecommerce.shipping.exception.IcarryApiException;
 import com.lemonacademy.ecommerce.shipping.util.DimensionParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -69,7 +70,7 @@ public class IcarryEstimateService {
                 String errorMsg = root.get("error").asText();
                 if (errorMsg != null && !errorMsg.isBlank()) {
                     log.error("iCarry Estimate API returned error: {}", errorMsg);
-                    throw new com.lemonacademy.ecommerce.shipping.exception.IcarryApiException("iCarry Estimate API Error: " + errorMsg, 400);
+                    throw new IcarryApiException("iCarry Estimate API Error: " + errorMsg, 400);
                 }
             }
             
@@ -91,9 +92,13 @@ public class IcarryEstimateService {
             }
             
             return list;
+        } catch (IcarryApiException e) {
+            log.error("iCarry estimate API error: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("Failed to parse estimate response: {}", e.getMessage());
-            throw new RuntimeException("Error fetching shipping estimates: " + e.getMessage(), e);
+            throw new IcarryApiException(
+                    "Error fetching shipping estimates: " + e.getMessage(), 500, e);
         }
     }
 

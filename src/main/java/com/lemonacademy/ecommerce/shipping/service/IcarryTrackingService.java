@@ -68,8 +68,11 @@ public class IcarryTrackingService {
                     .courierName(courier)
                     .events(events)
                     .build();
-        } catch (Exception e) {
+        } catch (IcarryApiException e) {
             log.error("Failed to track AWB {}: {}", trackingNumber, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error tracking AWB {}: {}", trackingNumber, e.getMessage());
             throw new IcarryApiException("Tracking API failed: " + e.getMessage(), 500, e);
         }
     }

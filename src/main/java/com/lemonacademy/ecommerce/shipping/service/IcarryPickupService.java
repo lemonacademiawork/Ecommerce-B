@@ -59,8 +59,11 @@ public class IcarryPickupService {
             
             log.info("Pickup address successfully managed. Address ID: {}", addressId);
             return addressId;
-        } catch (Exception e) {
+        } catch (IcarryApiException e) {
             log.error("Failed to manage pickup address: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error managing pickup address: {}", e.getMessage());
             throw new IcarryApiException("Pickup Address API failed: " + e.getMessage(), 500, e);
         }
     }
@@ -100,8 +103,11 @@ public class IcarryPickupService {
 
             log.info("Pickup successfully scheduled for order ID: {}", orderId);
             return orderRepository.save(order);
-        } catch (Exception e) {
+        } catch (IcarryApiException e) {
             log.error("Failed to schedule pickup for order {}: {}", orderId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error scheduling pickup for order {}: {}", orderId, e.getMessage());
             throw new IcarryApiException("Pickup API failed: " + e.getMessage(), 500, e);
         }
     }

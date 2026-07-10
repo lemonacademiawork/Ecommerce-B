@@ -74,7 +74,7 @@ public class IcarryShipmentService {
         body.add("consignee[country_code]", "IN");
 
         // 2. Parcel Details
-        body.add("parcel[type]", "Prepaid"); // Online Razorpay payments
+        body.add("parcel[type]", "P"); // P = Prepaid (online payment); D = COD
         body.add("parcel[value]", String.valueOf(order.getTotalAmount()));
         body.add("parcel[contents]", contents);
         body.add("parcel[weight]", String.valueOf(weight));
@@ -126,8 +126,11 @@ public class IcarryShipmentService {
                      order.getId(), shipmentId, awb);
 
             return orderRepository.save(order);
+        } catch (IcarryApiException e) {
+            log.error("Failed to book shipment for order {}: {}", order.getId(), e.getMessage());
+            throw e; // Re-throw with original status code preserved
         } catch (Exception e) {
-            log.error("Failed to automatically book shipment for order {}: {}", order.getId(), e.getMessage());
+            log.error("Unexpected error booking shipment for order {}: {}", order.getId(), e.getMessage());
             throw new IcarryApiException("Booking failed: " + e.getMessage(), 500, e);
         }
     }
@@ -171,8 +174,11 @@ public class IcarryShipmentService {
 
             log.info("Shipment cancelled successfully for order ID: {}", orderId);
             return orderRepository.save(order);
-        } catch (Exception e) {
+        } catch (IcarryApiException e) {
             log.error("Failed to cancel shipment for order {}: {}", orderId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error cancelling shipment for order {}: {}", orderId, e.getMessage());
             throw new IcarryApiException("Cancellation API failed: " + e.getMessage(), 500, e);
         }
     }
