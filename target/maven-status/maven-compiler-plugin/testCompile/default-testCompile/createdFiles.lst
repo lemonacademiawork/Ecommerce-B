@@ -4,6 +4,7 @@ com\lemonacademy\ecommerce\service\CloudinaryServiceTest.class
 com\lemonacademy\ecommerce\security\CustomUserDetailsServiceTest.class
 com\lemonacademy\ecommerce\security\JwtServiceTest.class
 com\lemonacademy\ecommerce\service\AddressServiceTest.class
+com\lemonacademy\ecommerce\shipping\controller\ShippingControllersTest.class
 com\lemonacademy\ecommerce\controller\AdminUserControllerTest.class
 com\lemonacademy\ecommerce\controller\CategoryControllerTest.class
 com\lemonacademy\ecommerce\service\AdminServiceTest.class

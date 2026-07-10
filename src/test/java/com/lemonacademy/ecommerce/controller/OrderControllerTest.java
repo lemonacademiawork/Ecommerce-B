@@ -125,11 +125,21 @@ class OrderControllerTest {
 
     @Test
     void getMyOrders_Authenticated_Success() throws Exception {
-        when(orderService.getMyOrders()).thenReturn(listResponse);
+        PageResponseDto<OrderResponse> pageResponse = PageResponseDto.<OrderResponse>builder()
+                .content(listResponse)
+                .pageNumber(0)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
+        when(orderService.getMyOrders(any(org.springframework.data.domain.Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/orders").with(user(customerUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].id").value(1));
+                .andExpect(jsonPath("$.data.content[0].id").value(1))
+                .andExpect(jsonPath("$.data.pageNumber").value(0))
+                .andExpect(jsonPath("$.data.pageSize").value(10));
     }
 
     @Test

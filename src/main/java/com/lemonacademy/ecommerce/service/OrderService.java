@@ -1,6 +1,8 @@
 package com.lemonacademy.ecommerce.service;
 
 import com.lemonacademy.ecommerce.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.lemonacademy.ecommerce.entity.*;
 import com.lemonacademy.ecommerce.exception.*;
 import com.lemonacademy.ecommerce.repository.*;
@@ -118,11 +120,10 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> getMyOrders() {
+    public PageResponseDto<OrderResponse> getMyOrders(Pageable pageable) {
         User user = getAuthenticatedUser();
-        return orderRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                .map(this::convertToOrderResponse)
-                .collect(Collectors.toList());
+        Page<Order> orderPage = orderRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        return PageResponseDto.of(orderPage, this::convertToOrderResponse);
     }
 
     @Transactional(readOnly = true)

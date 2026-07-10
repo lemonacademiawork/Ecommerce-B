@@ -3,7 +3,10 @@ package com.lemonacademy.ecommerce.controller;
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.OrderRequest;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.data.domain.PageRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,8 +32,11 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders() {
-        List<OrderResponse> response = orderService.getMyOrders();
+    @Operation(summary = "Get all orders for authenticated user")
+    public ResponseEntity<ApiResponse<PageResponseDto<OrderResponse>>> getMyOrders(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        PageResponseDto<OrderResponse> response = orderService.getMyOrders(PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success("Orders retrieved successfully", response));
     }
 

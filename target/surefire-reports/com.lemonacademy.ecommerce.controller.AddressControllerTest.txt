@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.AddressControllerTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.761 s -- in com.lemonacademy.ecommerce.controller.AddressControllerTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.35 s -- in com.lemonacademy.ecommerce.controller.AddressControllerTest

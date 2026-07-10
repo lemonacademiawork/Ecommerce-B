@@ -216,12 +216,17 @@ class OrderServiceTest {
 
     @Test
     void getMyOrders_Success() {
-        when(orderRepository.findByUserOrderByCreatedAtDesc(user)).thenReturn(Collections.singletonList(order));
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Page<Order> orderPage = new PageImpl<>(Collections.singletonList(order), pageRequest, 1);
+        when(orderRepository.findByUserOrderByCreatedAtDesc(user, pageRequest)).thenReturn(orderPage);
 
-        java.util.List<OrderResponse> response = orderService.getMyOrders();
+        PageResponseDto<OrderResponse> response = orderService.getMyOrders(pageRequest);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getPageNumber()).isEqualTo(0);
+        assertThat(response.getPageSize()).isEqualTo(10);
+        assertThat(response.getTotalElements()).isEqualTo(1);
     }
 
     @Test
