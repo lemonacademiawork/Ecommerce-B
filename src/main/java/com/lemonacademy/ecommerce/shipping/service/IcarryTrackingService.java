@@ -39,7 +39,7 @@ public class IcarryTrackingService {
 
         try {
             // Tracking API is safe to retry
-            String responseBody = client.post("/api_track", body, true);
+            String responseBody = client.post("/api_track_shipment", body, true);
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {

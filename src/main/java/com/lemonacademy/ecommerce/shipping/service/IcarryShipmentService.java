@@ -84,7 +84,7 @@ public class IcarryShipmentService {
 
         try {
             // DO NOT RETRY shipment booking to prevent duplicates
-            String responseBody = client.post("/api_book_shipment", body, false);
+            String responseBody = client.post("/api_add_shipment_surface", body, false);
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {

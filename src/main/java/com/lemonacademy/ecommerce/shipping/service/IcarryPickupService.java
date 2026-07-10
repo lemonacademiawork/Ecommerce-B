@@ -47,7 +47,7 @@ public class IcarryPickupService {
 
         try {
             // Address sync is safe to retry
-            String responseBody = client.post("/api_pickup_address", body, true);
+            String responseBody = client.post("/api_add_pickup_address", body, true);
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {
