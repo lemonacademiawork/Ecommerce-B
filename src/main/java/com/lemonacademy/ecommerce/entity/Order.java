@@ -84,6 +84,18 @@ public class Order {
     @Column(name = "last_tracking_sync")
     private LocalDateTime lastTrackingSync;
 
+    @Column(name = "weight")
+    private Integer weight;
+
+    @Column(name = "length")
+    private Integer length;
+
+    @Column(name = "breadth")
+    private Integer breadth;
+
+    @Column(name = "height")
+    private Integer height;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();

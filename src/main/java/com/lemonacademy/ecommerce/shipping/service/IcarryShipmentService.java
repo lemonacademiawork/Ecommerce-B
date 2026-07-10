@@ -57,10 +57,16 @@ public class IcarryShipmentService {
 
         // Determine dimensions
         int[] dims = DimensionParser.parse(config.getDefaultDimensions(), 10);
-        int length = dims[0];
-        int breadth = dims[1];
-        int height = dims[2];
-        int weight = config.getDefaultWeight();
+        int length = order.getLength() != null ? order.getLength() : dims[0];
+        int breadth = order.getBreadth() != null ? order.getBreadth() : dims[1];
+        int height = order.getHeight() != null ? order.getHeight() : dims[2];
+        int weight = order.getWeight() != null ? order.getWeight() : config.getDefaultWeight();
+        
+        // Save dimensions to the order so they can be retrieved later
+        order.setLength(length);
+        order.setBreadth(breadth);
+        order.setHeight(height);
+        order.setWeight(weight);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         
@@ -77,10 +83,16 @@ public class IcarryShipmentService {
         body.add("parcel[type]", "P"); // P = Prepaid (online payment); D = COD
         body.add("parcel[value]", String.valueOf(order.getTotalAmount()));
         body.add("parcel[contents]", contents);
-        body.add("parcel[weight]", String.valueOf(weight));
-        body.add("parcel[length]", String.valueOf(length));
-        body.add("parcel[breadth]", String.valueOf(breadth));
-        body.add("parcel[height]", String.valueOf(height));
+        
+        // Root level physical attributes
+        body.add("weight", String.valueOf(weight));
+        body.add("weight_unit", "gm");
+        body.add("length", String.valueOf(length));
+        body.add("breadth", String.valueOf(breadth));
+        body.add("height", String.valueOf(height));
+        
+        // Required pickup address reference
+        body.add("pickup_address_id", config.getPickupAddressId());
 
         try {
             // DO NOT RETRY shipment booking to prevent duplicates

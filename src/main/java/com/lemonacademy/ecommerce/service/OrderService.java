@@ -7,6 +7,8 @@ import com.lemonacademy.ecommerce.entity.*;
 import com.lemonacademy.ecommerce.exception.*;
 import com.lemonacademy.ecommerce.repository.*;
 import com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService;
+import com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService;
+import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final IcarryShipmentService icarryShipmentService;
+    private final IcarryTrackingService icarryTrackingService;
 
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -138,7 +141,22 @@ public class OrderService {
             throw new UnauthorizedAccessException("You are not authorized to view this order");
         }
 
-        return convertToOrderResponse(order);
+        OrderResponse response = convertToOrderResponse(order);
+        
+        // Fetch live tracking history for this order if it has an AWB number
+        if (order.getAwbNumber() != null && !order.getAwbNumber().trim().isEmpty()) {
+            try {
+                TrackingResponse tracking = icarryTrackingService.trackShipment(order.getAwbNumber());
+                if (tracking != null) {
+                    response.setTrackingEvents(tracking.getEvents());
+                    response.setShipmentStatus(tracking.getStatus());
+                }
+            } catch (Exception e) {
+                // Ignore tracking fetch errors so the order details still load
+            }
+        }
+        
+        return response;
     }
 
     // --- Admin Operations ---
@@ -207,8 +225,11 @@ public class OrderService {
                 .pickupRequested(order.getPickupRequested())
                 .pickupDate(order.getPickupDate())
                 .reverseShipmentId(order.getReverseShipmentId())
-                .deliveryAttempts(order.getDeliveryAttempts())
                 .lastTrackingSync(order.getLastTrackingSync())
+                .weight(order.getWeight())
+                .length(order.getLength())
+                .breadth(order.getBreadth())
+                .height(order.getHeight())
                 .build();
     }
 }

@@ -31,6 +31,9 @@ public class IcarryConfig {
     @Value("${icarry.default-dimensions:10x10x10}")
     private String defaultDimensions;
 
+    @Value("${icarry.pickup-address-id:PRIMARY}")
+    private String pickupAddressId;
+
     @Bean(name = "icarryRestClient")
     public RestClient icarryRestClient() {
         return RestClient.builder()

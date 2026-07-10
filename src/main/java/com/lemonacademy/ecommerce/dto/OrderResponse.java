@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse.TrackingEvent;
 
 @Data
 @NoArgsConstructor
@@ -36,6 +37,12 @@ public class OrderResponse {
     private Boolean pickupRequested;
     private LocalDateTime pickupDate;
     private String reverseShipmentId;
-    private Integer deliveryAttempts;
     private LocalDateTime lastTrackingSync;
+
+    // Additional Shipment Details requested by frontend
+    private Integer weight;
+    private Integer length;
+    private Integer breadth;
+    private Integer height;
+    private List<TrackingEvent> trackingEvents;
 }
