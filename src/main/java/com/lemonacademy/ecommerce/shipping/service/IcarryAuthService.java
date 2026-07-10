@@ -29,7 +29,7 @@ public class IcarryAuthService {
     private static final String TOKEN_KEY = "icarry_api_token";
     private static final String LOCAL_TOKEN_KEY = "token";
 
-    public IcarryAuthService(RestClient restClient, IcarryConfig config, 
+    public IcarryAuthService(@org.springframework.beans.factory.annotation.Qualifier("icarryRestClient") RestClient restClient, IcarryConfig config, 
                              UpstashRedisService redisService, ObjectMapper objectMapper) {
         this.restClient = restClient;
         this.config = config;

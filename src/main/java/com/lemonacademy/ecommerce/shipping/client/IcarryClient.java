@@ -22,7 +22,7 @@ public class IcarryClient {
     private final IcarryConfig config;
     private final IcarryAuthService authService;
 
-    public IcarryClient(RestClient restClient, IcarryConfig config, @Lazy IcarryAuthService authService) {
+    public IcarryClient(@org.springframework.beans.factory.annotation.Qualifier("icarryRestClient") RestClient restClient, IcarryConfig config, @Lazy IcarryAuthService authService) {
         this.restClient = restClient;
         this.config = config;
         this.authService = authService;
