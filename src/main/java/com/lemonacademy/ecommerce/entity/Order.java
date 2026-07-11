@@ -25,7 +25,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "order_number", unique = true, nullable = false, updatable = false)
+    @Column(name = "order_number", updatable = false)
     private String orderNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
