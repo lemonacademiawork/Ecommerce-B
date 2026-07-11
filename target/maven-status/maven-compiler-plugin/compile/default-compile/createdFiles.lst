@@ -9,13 +9,16 @@ com\lemonacademy\ecommerce\shipping\controller\CustomerShippingController.class
 com\lemonacademy\ecommerce\controller\AddressController.class
 com\lemonacademy\ecommerce\dto\UpdateProfileRequest$UpdateProfileRequestBuilder.class
 com\lemonacademy\ecommerce\dto\SendOtpRequest$SendOtpRequestBuilder.class
+com\lemonacademy\ecommerce\dto\QrDetailsResponse.class
 com\lemonacademy\ecommerce\shipping\dto\ShippingEstimateRequest$ShippingEstimateRequestBuilder.class
 com\lemonacademy\ecommerce\controller\AuthController.class
+com\lemonacademy\ecommerce\dto\AdminPaymentResponse.class
 com\lemonacademy\ecommerce\dto\CartItemResponse.class
 com\lemonacademy\ecommerce\dto\PageResponseDto$PageResponseDtoBuilder.class
 com\lemonacademy\ecommerce\dto\ProductRequestDto.class
 com\lemonacademy\ecommerce\dto\AdminAuthResponse$AdminAuthResponseBuilder.class
 com\lemonacademy\ecommerce\security\CookieUtils.class
+com\lemonacademy\ecommerce\controller\AdminPaymentController.class
 com\lemonacademy\ecommerce\entity\OrderItem$OrderItemBuilder.class
 com\lemonacademy\ecommerce\dto\DashboardResponse$DashboardResponseBuilder.class
 com\lemonacademy\ecommerce\entity\Order.class
@@ -76,6 +79,7 @@ com\lemonacademy\ecommerce\shipping\dto\TrackingResponse.class
 com\lemonacademy\ecommerce\dto\OrderStatusRequest$OrderStatusRequestBuilder.class
 com\lemonacademy\ecommerce\shipping\dto\TrackingResponse$TrackingEvent.class
 com\lemonacademy\ecommerce\repository\OrderRepository.class
+com\lemonacademy\ecommerce\entity\PaymentStatus.class
 com\lemonacademy\ecommerce\security\CustomUserDetailsService.class
 com\lemonacademy\ecommerce\controller\AdminUserController.class
 com\lemonacademy\ecommerce\entity\Product$ProductBuilder.class
@@ -86,6 +90,7 @@ com\lemonacademy\ecommerce\shipping\client\IcarryClient.class
 com\lemonacademy\ecommerce\dto\ProductRequestDto$ProductRequestDtoBuilder.class
 com\lemonacademy\ecommerce\config\AdminInitializer.class
 com\lemonacademy\ecommerce\repository\UserCouponRepository.class
+com\lemonacademy\ecommerce\controller\PaymentController.class
 com\lemonacademy\ecommerce\config\CorsConfig.class
 com\lemonacademy\ecommerce\dto\UserProfileResponse.class
 com\lemonacademy\ecommerce\dto\ProductResponseDto$ProductResponseDtoBuilder.class
@@ -119,6 +124,7 @@ com\lemonacademy\ecommerce\dto\UpdateProfileRequest.class
 com\lemonacademy\ecommerce\shipping\dto\CustomerEstimateRequest$CustomerEstimateRequestBuilder.class
 com\lemonacademy\ecommerce\controller\AdminDashboardController.class
 com\lemonacademy\ecommerce\shipping\exception\ShippingException.class
+com\lemonacademy\ecommerce\service\QrPaymentService.class
 com\lemonacademy\ecommerce\dto\OrderResponse.class
 com\lemonacademy\ecommerce\shipping\dto\TrackingResponse$TrackingResponseBuilder.class
 com\lemonacademy\ecommerce\shipping\service\IcarryTrackingService.class
@@ -147,6 +153,7 @@ com\lemonacademy\ecommerce\dto\ChangePasswordRequest.class
 com\lemonacademy\ecommerce\service\UserService.class
 com\lemonacademy\ecommerce\controller\CartController.class
 com\lemonacademy\ecommerce\dto\AddToCartRequest.class
+com\lemonacademy\ecommerce\service\PaymentStrategy.class
 com\lemonacademy\ecommerce\entity\Cart$CartBuilder.class
 com\lemonacademy\ecommerce\exception\InsufficientStockException.class
 com\lemonacademy\ecommerce\shipping\service\IcarryWebhookService.class
@@ -159,6 +166,8 @@ com\lemonacademy\ecommerce\entity\Category.class
 com\lemonacademy\ecommerce\entity\UserCoupon$UserCouponBuilder.class
 com\lemonacademy\ecommerce\shipping\service\IcarryPickupService.class
 com\lemonacademy\ecommerce\dto\AdminResponse$AdminResponseBuilder.class
+com\lemonacademy\ecommerce\dto\QrDetailsResponse$QrDetailsResponseBuilder.class
+com\lemonacademy\ecommerce\entity\PaymentMethod.class
 com\lemonacademy\ecommerce\entity\Coupon$CouponBuilder.class
 com\lemonacademy\ecommerce\shipping\dto\ShippingEstimateRequest.class
 com\lemonacademy\ecommerce\dto\OrderRequest$OrderRequestBuilder.class
@@ -168,6 +177,7 @@ com\lemonacademy\ecommerce\dto\VerifyOtpRequest.class
 com\lemonacademy\ecommerce\shipping\service\IcarryAuthService.class
 com\lemonacademy\ecommerce\shipping\dto\IcarryWebhookPayload$IcarryWebhookPayloadBuilder.class
 com\lemonacademy\ecommerce\dto\PageResponseDto.class
+com\lemonacademy\ecommerce\dto\AdminPaymentResponse$AdminPaymentResponseBuilder.class
 com\lemonacademy\ecommerce\dto\ChangePasswordRequest$ChangePasswordRequestBuilder.class
 com\lemonacademy\ecommerce\controller\AdminController.class
 com\lemonacademy\ecommerce\entity\Product.class

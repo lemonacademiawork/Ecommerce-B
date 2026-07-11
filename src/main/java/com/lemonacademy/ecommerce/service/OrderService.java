@@ -370,6 +370,10 @@ public class OrderService {
                 .length(order.getLength())
                 .breadth(order.getBreadth())
                 .height(order.getHeight())
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .transactionId(order.getTransactionId())
+                .paymentScreenshotUrl(order.getPaymentScreenshotUrl())
                 .build();
     }
 }

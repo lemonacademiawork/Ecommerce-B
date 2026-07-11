@@ -16,10 +16,18 @@ public class CloudinaryService {
     private final Cloudinary cloudinary;
 
     public String uploadImage(MultipartFile file) throws IOException {
+        return uploadImage(file, null);
+    }
+
+    public String uploadImage(MultipartFile file, String folder) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
         }
-        Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+        Map<String, Object> options = ObjectUtils.asMap("resource_type", "auto");
+        if (folder != null && !folder.trim().isEmpty()) {
+            options.put("folder", folder);
+        }
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
         return uploadResult.get("secure_url").toString();
     }
 }

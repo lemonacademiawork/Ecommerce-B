@@ -32,6 +32,12 @@ public class OrderResponse {
     private List<OrderItemResponse> items;
     private LocalDateTime createdAt;
 
+    // Payment Fields
+    private com.lemonacademy.ecommerce.entity.PaymentMethod paymentMethod;
+    private com.lemonacademy.ecommerce.entity.PaymentStatus paymentStatus;
+    private String transactionId;
+    private String paymentScreenshotUrl;
+
     // Shipping Fields
     private String shipmentId;
     private String trackingNumber;

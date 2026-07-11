@@ -112,6 +112,26 @@ public class Order {
     @Column(name = "height")
     private Integer height;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "transaction_id")
+    private String transactionId;
+
+    @Column(name = "payment_screenshot_url")
+    private String paymentScreenshotUrl;
+
+    @Column(name = "payment_verified_at")
+    private LocalDateTime paymentVerifiedAt;
+
+    @Column(name = "verified_by_admin_id")
+    private java.util.UUID verifiedByAdminId;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
