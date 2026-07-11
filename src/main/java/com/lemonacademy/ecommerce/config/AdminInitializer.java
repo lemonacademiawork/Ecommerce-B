@@ -2,7 +2,9 @@ package com.lemonacademy.ecommerce.config;
 
 import com.lemonacademy.ecommerce.entity.Admin;
 import com.lemonacademy.ecommerce.entity.Role;
+import com.lemonacademy.ecommerce.entity.Coupon;
 import com.lemonacademy.ecommerce.repository.AdminRepository;
+import com.lemonacademy.ecommerce.repository.CouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class AdminInitializer implements CommandLineRunner {
 
     private final AdminRepository adminRepository;
+    private final CouponRepository couponRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -26,6 +29,15 @@ public class AdminInitializer implements CommandLineRunner {
                     .active(true)
                     .build();
             adminRepository.save(defaultAdmin);
+        }
+
+        if (couponRepository.count() == 0) {
+            Coupon firstOrderCoupon = Coupon.builder()
+                    .code("FIRST7")
+                    .discountPercentage(java.math.BigDecimal.valueOf(7.0))
+                    .active(true)
+                    .build();
+            couponRepository.save(firstOrderCoupon);
         }
     }
 }
