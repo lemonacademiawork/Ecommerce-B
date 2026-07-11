@@ -139,7 +139,7 @@ public class ProductService {
                 .stock(product.getStock())
                 .imageUrl(product.getImageUrl())
                 .active(product.getActive())
-                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .categoryId(product.getCategory() != null ? product.getCategory().getName() : "")
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

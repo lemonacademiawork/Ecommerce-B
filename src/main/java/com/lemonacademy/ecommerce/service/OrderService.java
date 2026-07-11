@@ -291,9 +291,19 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updateOrderStatus(UUID id, OrderStatus status) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+    public OrderResponse updateOrderStatus(String id, OrderStatus status) {
+        Order order = null;
+        try {
+            UUID uuid = UUID.fromString(id);
+            order = orderRepository.findById(uuid).orElse(null);
+        } catch (IllegalArgumentException e) {
+            // Not a UUID, try orderNumber
+        }
+        
+        if (order == null) {
+            order = orderRepository.findByOrderNumber(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        }
 
         order.setStatus(status);
         Order updated = orderRepository.save(order);

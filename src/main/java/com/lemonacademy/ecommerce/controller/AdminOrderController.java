@@ -36,7 +36,7 @@ public class AdminOrderController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody OrderStatusRequest request) {
         OrderResponse response = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("Order status updated successfully", response));
