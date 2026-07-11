@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -139,7 +138,7 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/orders").with(user(customerUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].id").value(1))
+                .andExpect(jsonPath("$.data.content[0].id").value("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(jsonPath("$.data.pageNumber").value(0))
                 .andExpect(jsonPath("$.data.pageSize").value(10));
     }
@@ -156,15 +155,15 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(customerUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1));
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void getOrderDetails_NotFound_Returns404() throws Exception {
         when(orderService.getOrderDetails(any(UUID.class)))
-                .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
+                .thenThrow(new ResourceNotFoundException("Order not found with id: 23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        mockMvc.perform(get("/api/orders/99").with(user(customerUser)))
+        mockMvc.perform(get("/api/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(customerUser)))
                 .andExpect(status().isNotFound());
     }
 }

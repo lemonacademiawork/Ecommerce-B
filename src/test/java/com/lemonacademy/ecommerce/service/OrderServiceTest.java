@@ -37,7 +37,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +56,9 @@ class OrderServiceTest {
 
     @Mock
     private com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService icarryShipmentService;
+
+    @Mock
+    private com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService icarryTrackingService;
 
     @InjectMocks
     private OrderService orderService;

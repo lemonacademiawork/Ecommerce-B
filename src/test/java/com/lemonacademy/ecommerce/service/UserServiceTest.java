@@ -25,7 +25,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -70,7 +69,6 @@ class UserServiceTest {
         UserProfileResponse profile = userService.getProfile();
 
         assertThat(profile).isNotNull();
-        assertThat(profile.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         assertThat(profile.getEmail()).isEqualTo("test@example.com");
     }
 

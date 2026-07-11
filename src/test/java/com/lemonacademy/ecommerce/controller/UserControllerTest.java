@@ -63,7 +63,6 @@ class UserControllerTest {
         customerUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         profileResponse = UserProfileResponse.builder()
-                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Test User")
                 .email("customer@test.com")
                 .role(Role.CUSTOMER)
@@ -93,7 +92,6 @@ class UserControllerTest {
         request.setPhone("+1234567890");
 
         UserProfileResponse updatedProfile = UserProfileResponse.builder()
-                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .name("Updated Name")
                 .email("customer@test.com")
                 .role(Role.CUSTOMER)
