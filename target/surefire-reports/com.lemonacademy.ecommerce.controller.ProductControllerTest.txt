@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.ProductControllerTest
 -------------------------------------------------------------------------------
-Tests run: 14, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 0.628 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.ProductControllerTest
-com.lemonacademy.ecommerce.controller.ProductControllerTest.getProducts_ByCategory_Success -- Time elapsed: 0.009 s <<< FAILURE!
+Tests run: 14, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 0.617 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.ProductControllerTest
+com.lemonacademy.ecommerce.controller.ProductControllerTest.getProducts_ByCategory_Success -- Time elapsed: 0.007 s <<< FAILURE!
 java.lang.AssertionError: Status expected:<200> but was:<500>
 	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
 	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
@@ -24,7 +24,7 @@ java.lang.AssertionError: Status expected:<404> but was:<500>
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 
-com.lemonacademy.ecommerce.controller.ProductControllerTest.getProductById_NotFound_Returns404 -- Time elapsed: 0.007 s <<< FAILURE!
+com.lemonacademy.ecommerce.controller.ProductControllerTest.getProductById_NotFound_Returns404 -- Time elapsed: 0.008 s <<< FAILURE!
 java.lang.AssertionError: Status expected:<404> but was:<500>
 	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
 	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)

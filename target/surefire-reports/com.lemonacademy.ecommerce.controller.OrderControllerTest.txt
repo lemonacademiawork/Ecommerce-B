@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.OrderControllerTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.062 s -- in com.lemonacademy.ecommerce.controller.OrderControllerTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.556 s -- in com.lemonacademy.ecommerce.controller.OrderControllerTest

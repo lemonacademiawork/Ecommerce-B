@@ -237,10 +237,10 @@ class OrderServiceTest {
     void getOrderDetails_Owned_Success() {
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        OrderResponse response = orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        OrderResponse response = orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542");
 
         assertThat(response).isNotNull();
-        assertThat(response.getId()).isEqualTo(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        assertThat(response.getId()).isEqualTo("LH-20260711-A3F8");
     }
 
     @Test
@@ -251,7 +251,7 @@ class OrderServiceTest {
 
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        OrderResponse response = orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        OrderResponse response = orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542");
 
         assertThat(response).isNotNull();
     }
@@ -264,14 +264,14 @@ class OrderServiceTest {
 
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
 
-        assertThrows(UnauthorizedAccessException.class, () -> orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
+        assertThrows(UnauthorizedAccessException.class, () -> orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void getOrderDetails_NotFound() {
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test

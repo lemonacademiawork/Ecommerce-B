@@ -71,7 +71,7 @@ class AdminOrderControllerTest {
         customerUser = User.builder().id(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         orderResponse = OrderResponse.builder()
-                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .id("23db3d7a-683b-372b-8036-95da3ae5c542")
                 .userId(UUID.fromString("df4382cf-73c7-35ab-965a-b690f63e0acf"))
                 .totalAmount(new BigDecimal("2000.00"))
                 .status(OrderStatus.PENDING)
@@ -105,7 +105,7 @@ class AdminOrderControllerTest {
 
     @Test
     void getOrderDetails_AsAdmin_Success() throws Exception {
-        when(orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(orderResponse);
+        when(orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542")).thenReturn(orderResponse);
 
         mockMvc.perform(get("/api/admin/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(adminUser)))
                 .andExpect(status().isOk())
@@ -115,7 +115,7 @@ class AdminOrderControllerTest {
 
     @Test
     void getOrderDetails_NotFound_Returns404() throws Exception {
-        when(orderService.getOrderDetails(any(UUID.class)))
+        when(orderService.getOrderDetails(any(String.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
 
         mockMvc.perform(get("/api/admin/orders/99").with(user(adminUser)))
@@ -127,13 +127,13 @@ class AdminOrderControllerTest {
         OrderStatusRequest request = new OrderStatusRequest();
         request.setStatus(OrderStatus.SHIPPED);
 
-        OrderResponse shippedOrder = OrderResponse.builder()
-                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+        OrderResponse updatedResponse = OrderResponse.builder()
+                .id("23db3d7a-683b-372b-8036-95da3ae5c542")
                 .status(OrderStatus.SHIPPED)
                 .items(Collections.emptyList())
                 .build();
 
-        when(orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED)).thenReturn(shippedOrder);
+        when(orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED)).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/api/admin/orders/1/status")
                         .with(user(adminUser))

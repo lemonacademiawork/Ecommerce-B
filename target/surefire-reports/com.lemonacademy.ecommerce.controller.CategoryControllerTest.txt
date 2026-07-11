@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.CategoryControllerTest
 -------------------------------------------------------------------------------
-Tests run: 11, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.576 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.CategoryControllerTest
-com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_Success -- Time elapsed: 0.008 s <<< FAILURE!
+Tests run: 11, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.680 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.CategoryControllerTest
+com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_Success -- Time elapsed: 0.012 s <<< FAILURE!
 java.lang.AssertionError: At JSON path "$.data.id", value <23db3d7a-683b-372b-8036-95da3ae5c542> of type <java.lang.String> cannot be converted to type <java.lang.Integer>
 	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:120)
 	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
@@ -27,7 +27,7 @@ Caused by: java.lang.NumberFormatException: For input string: "23db3d7a-683b-372
 	at com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider.map(JsonSmartMappingProvider.java:82)
 	... 10 more
 
-com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_NotFound_Returns404 -- Time elapsed: 0.006 s <<< FAILURE!
+com.lemonacademy.ecommerce.controller.CategoryControllerTest.getCategoryById_NotFound_Returns404 -- Time elapsed: 0.007 s <<< FAILURE!
 java.lang.AssertionError: Status expected:<404> but was:<500>
 	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
 	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)

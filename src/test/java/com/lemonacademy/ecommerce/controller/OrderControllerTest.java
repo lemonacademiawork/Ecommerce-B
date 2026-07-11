@@ -69,7 +69,7 @@ class OrderControllerTest {
         customerUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("customer@test.com").role(Role.CUSTOMER).build();
 
         orderResponse = OrderResponse.builder()
-                .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .id("23db3d7a-683b-372b-8036-95da3ae5c542")
                 .userId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .totalAmount(new BigDecimal("2000.00"))
                 .status(OrderStatus.PENDING)
@@ -151,7 +151,7 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetails_Authenticated_Success() throws Exception {
-        when(orderService.getOrderDetails(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(orderResponse);
+        when(orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542")).thenReturn(orderResponse);
 
         mockMvc.perform(get("/api/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(customerUser)))
                 .andExpect(status().isOk())
@@ -160,7 +160,7 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetails_NotFound_Returns404() throws Exception {
-        when(orderService.getOrderDetails(any(UUID.class)))
+        when(orderService.getOrderDetails(any(String.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 23db3d7a-683b-372b-8036-95da3ae5c542"));
 
         mockMvc.perform(get("/api/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(customerUser)))

@@ -1,4 +1,16 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.service.OrderServiceTest
 -------------------------------------------------------------------------------
-Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.748 s -- in com.lemonacademy.ecommerce.service.OrderServiceTest
+Tests run: 14, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.166 s <<< FAILURE! -- in com.lemonacademy.ecommerce.service.OrderServiceTest
+com.lemonacademy.ecommerce.service.OrderServiceTest.getOrderDetails_Owned_Success -- Time elapsed: 0.015 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+
+expected: "23db3d7a-683b-372b-8036-95da3ae5c542"
+ but was: null
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at com.lemonacademy.ecommerce.service.OrderServiceTest.getOrderDetails_Owned_Success(OrderServiceTest.java:243)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

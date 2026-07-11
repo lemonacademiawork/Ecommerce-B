@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.AdminUserControllerTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.489 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.AdminUserControllerTest
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.691 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.AdminUserControllerTest
 com.lemonacademy.ecommerce.controller.AdminUserControllerTest.getAllUsers_AsAdmin_Success -- Time elapsed: 0.020 s <<< FAILURE!
 java.lang.AssertionError: At JSON path "$.data[0].id", value <df4382cf-73c7-35ab-965a-b690f63e0acf> of type <java.lang.String> cannot be converted to type <java.lang.Integer>
 	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:120)

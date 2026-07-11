@@ -7,8 +7,10 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "orders")
@@ -22,6 +24,9 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "order_number", unique = true, nullable = false, updatable = false)
+    private String orderNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -101,11 +106,23 @@ public class Order {
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.orderNumber == null) {
+            this.orderNumber = generateOrderNumber();
+        }
         if (this.pickupRequested == null) {
             this.pickupRequested = false;
         }
         if (this.deliveryAttempts == null) {
             this.deliveryAttempts = 0;
         }
+    }
+
+    private String generateOrderNumber() {
+        String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String randomPart = Integer.toHexString(ThreadLocalRandom.current().nextInt(0x10000)).toUpperCase();
+        while (randomPart.length() < 4) {
+            randomPart = "0" + randomPart;
+        }
+        return "LH-" + datePart + "-" + randomPart;
     }
 }

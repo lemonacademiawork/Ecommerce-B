@@ -20,4 +20,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     long countByStatus(OrderStatus status);
     java.util.Optional<Order> findByAwbNumber(String awbNumber);
     java.util.Optional<Order> findByShipmentId(String shipmentId);
+    java.util.Optional<Order> findByOrderNumber(String orderNumber);
 }

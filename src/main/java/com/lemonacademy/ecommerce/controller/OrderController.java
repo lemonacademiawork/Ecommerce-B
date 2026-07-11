@@ -1,7 +1,5 @@
 package com.lemonacademy.ecommerce.controller;
 
-import java.util.UUID;
-
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.OrderRequest;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
@@ -15,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -43,7 +39,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetails(@PathVariable String id) {
         OrderResponse response = orderService.getOrderDetails(id);
         return ResponseEntity.ok(ApiResponse.success("Order details retrieved successfully", response));
     }

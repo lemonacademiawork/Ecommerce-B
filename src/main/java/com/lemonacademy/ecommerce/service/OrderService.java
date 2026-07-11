@@ -150,10 +150,20 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrderDetails(UUID id) {
+    public OrderResponse getOrderDetails(String id) {
         User user = getAuthenticatedUser();
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        Order order = null;
+        try {
+            UUID uuid = UUID.fromString(id);
+            order = orderRepository.findById(uuid).orElse(null);
+        } catch (IllegalArgumentException e) {
+            // Not a UUID, try orderNumber
+        }
+        
+        if (order == null) {
+            order = orderRepository.findByOrderNumber(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        }
 
         // Validate Ownership: Admin can access any order, Customer can only access their own
         boolean isAdmin = user.getRole() == Role.ADMIN;
@@ -227,7 +237,9 @@ public class OrderService {
                 .build();
 
         return OrderResponse.builder()
-                .id(order.getId())
+                .id(order.getOrderNumber())
+                .orderNumber(order.getOrderNumber())
+                .internalId(order.getId())
                 .userId(order.getUser().getId())
                 .address(addressResponse)
                 .totalAmount(order.getTotalAmount())

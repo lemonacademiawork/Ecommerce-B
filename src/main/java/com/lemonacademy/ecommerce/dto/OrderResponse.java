@@ -19,7 +19,9 @@ import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse.TrackingEvent;
 @Builder
 public class OrderResponse {
 
-    private UUID id;
+    private String id;
+    private String orderNumber;
+    private UUID internalId;
     private UUID userId;
     private AddressResponse address;
     private BigDecimal totalAmount;

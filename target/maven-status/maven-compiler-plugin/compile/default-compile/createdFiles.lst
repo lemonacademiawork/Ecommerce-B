@@ -55,6 +55,7 @@ com\lemonacademy\ecommerce\dto\UserResponse$UserResponseBuilder.class
 com\lemonacademy\ecommerce\controller\ProductController.class
 com\lemonacademy\ecommerce\dto\OrderItemResponse$OrderItemResponseBuilder.class
 com\lemonacademy\ecommerce\service\WhatsappService.class
+com\lemonacademy\ecommerce\shipping\controller\ShippingController.class
 com\lemonacademy\ecommerce\dto\LoginRequest.class
 com\lemonacademy\ecommerce\shipping\dto\TrackingResponse$TrackingEvent$TrackingEventBuilder.class
 com\lemonacademy\ecommerce\dto\AdminLoginRequest.class

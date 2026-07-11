@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.350 s <<< FAILURE! -- in com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest
-com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment -- Time elapsed: 0.015 s <<< ERROR!
+Tests run: 9, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.423 s <<< FAILURE! -- in com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest
+com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment -- Time elapsed: 0.022 s <<< ERROR!
 com.lemonacademy.ecommerce.shipping.exception.IcarryApiException: 
 Tracking API failed: 
 Strict stubbing argument mismatch. Please check:
@@ -53,7 +53,7 @@ For more information see javadoc for PotentialStubbingProblem class.
 	at com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService.trackShipment(IcarryTrackingService.java:44)
 	... 4 more
 
-com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess -- Time elapsed: 0.006 s <<< ERROR!
+com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess -- Time elapsed: 0.008 s <<< ERROR!
 com.lemonacademy.ecommerce.shipping.exception.IcarryApiException: 
 Booking failed: 
 Strict stubbing argument mismatch. Please check:
