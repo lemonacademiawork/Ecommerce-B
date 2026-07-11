@@ -28,10 +28,15 @@ public class PaymentController {
 
     @GetMapping("/qr")
     public ResponseEntity<ApiResponse<QrDetailsResponse>> getQrDetails() {
+        String absoluteImageUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/images/qr.jpeg")
+                .toUriString();
+
         QrDetailsResponse response = QrDetailsResponse.builder()
                 .merchantName("MANISHI NIGAM")
                 .upiId("")
-                .qrImageUrl("/images/qr.jpeg")
+                .qrImageUrl(absoluteImageUrl)
                 .build();
         return ResponseEntity.ok(ApiResponse.success("QR Details retrieved successfully", response));
     }
