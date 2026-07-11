@@ -12,6 +12,7 @@ import com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService;
 import com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService;
 import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -38,8 +40,38 @@ public class OrderService {
         return (User) authentication.getPrincipal();
     }
 
-    @Transactional
+    /**
+     * Creates an order. The order save and the iCarry booking are in separate
+     * transactions so that a shipping API failure does not roll back the order.
+     */
     public OrderResponse createOrder(OrderRequest request) {
+        // Step 1: Save order in its own transaction
+        Order savedOrder = saveOrderInTransaction(request);
+
+        // Step 2: Attempt iCarry booking outside the order transaction
+        try {
+            Order booked = icarryShipmentService.bookShipmentForOrder(savedOrder);
+            if (booked != null) {
+                savedOrder = booked;
+            }
+        } catch (Exception e) {
+            log.warn("iCarry booking failed for order {}: {}. Order is saved with PENDING status.",
+                     savedOrder.getId(), e.getMessage());
+            // Order is already persisted — just mark shipment as pending
+            try {
+                savedOrder.setShipmentStatus("PENDING_BOOKING");
+                savedOrder = orderRepository.save(savedOrder);
+            } catch (Exception inner) {
+                // Log but don't fail — the order itself is safe
+                log.error("Failed to update shipment status for order {}: {}", savedOrder.getId(), inner.getMessage());
+            }
+        }
+
+        return convertToOrderResponse(savedOrder);
+    }
+
+    @Transactional
+    public Order saveOrderInTransaction(OrderRequest request) {
         User user = getAuthenticatedUser();
 
         // 1. Fetch Cart and validate it's not empty
@@ -107,21 +139,7 @@ public class OrderService {
         cartRepository.save(cart);
 
         // 5. Save Order
-        Order savedOrder = orderRepository.save(order);
-
-        // 6. Automatically book shipment with iCarry
-        try {
-            Order booked = icarryShipmentService.bookShipmentForOrder(savedOrder);
-            if (booked != null) {
-                savedOrder = booked;
-            }
-        } catch (Exception e) {
-            // Fallback: update status to PENDING_BOOKING so it can be retried manually
-            savedOrder.setShipmentStatus("PENDING_BOOKING");
-            savedOrder = orderRepository.save(savedOrder);
-        }
-
-        return convertToOrderResponse(savedOrder);
+        return orderRepository.save(order);
     }
 
     @Transactional(readOnly = true)

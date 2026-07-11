@@ -1,6 +1,5 @@
 package com.lemonacademy.ecommerce.dto;
 
-import java.util.UUID;
 
 import com.lemonacademy.ecommerce.entity.Role;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserProfileResponse {
-    private UUID id;
     private String name;
     private String email;
     private String phone;
