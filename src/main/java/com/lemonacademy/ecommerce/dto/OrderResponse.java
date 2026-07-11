@@ -24,7 +24,10 @@ public class OrderResponse {
     private UUID internalId;
     private UUID userId;
     private AddressResponse address;
+    private BigDecimal subtotal;
     private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
+    private String couponCode;
     private OrderStatus status;
     private List<OrderItemResponse> items;
     private LocalDateTime createdAt;

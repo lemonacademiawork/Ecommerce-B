@@ -27,4 +27,9 @@ public class ProductResponseDto {
     private String categoryName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private Integer weight;
+    private Integer length;
+    private Integer breadth;
+    private Integer height;
 }

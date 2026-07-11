@@ -16,4 +16,6 @@ public class OrderRequest {
 
     @NotNull(message = "Address ID is required")
     private UUID addressId;
+
+    private String couponCode;
 }

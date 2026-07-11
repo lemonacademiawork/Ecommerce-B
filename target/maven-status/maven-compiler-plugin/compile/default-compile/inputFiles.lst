@@ -49,12 +49,14 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Cart.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\CartItem.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Category.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Coupon.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Order.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\OrderItem.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\OrderStatus.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Product.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\Role.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\User.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\entity\UserCoupon.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\exception\GlobalExceptionHandler.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\exception\InsufficientStockException.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\exception\InvalidOperationException.java
@@ -66,9 +68,11 @@ C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\co
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\CartItemRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\CartRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\CategoryRepository.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\CouponRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\OrderItemRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\OrderRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\ProductRepository.java
+C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\UserCouponRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\repository\UserRepository.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\AdminUserDetails.java
 C:\Users\manis\OneDrive\Desktop\LemonAcademy\E-Commerce\backend\src\main\java\com\lemonacademy\ecommerce\security\AdminUserDetailsService.java

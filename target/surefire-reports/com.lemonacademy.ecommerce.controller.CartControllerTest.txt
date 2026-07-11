@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.lemonacademy.ecommerce.controller.CartControllerTest
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.710 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.CartControllerTest
-com.lemonacademy.ecommerce.controller.CartControllerTest.getCart_Authenticated_Success -- Time elapsed: 0.020 s <<< FAILURE!
+Tests run: 9, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.817 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.CartControllerTest
+com.lemonacademy.ecommerce.controller.CartControllerTest.getCart_Authenticated_Success -- Time elapsed: 0.027 s <<< FAILURE!
 java.lang.AssertionError: At JSON path "$.data.cartId", value <23db3d7a-683b-372b-8036-95da3ae5c542> of type <java.lang.String> cannot be converted to type <java.lang.Integer>
 	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:120)
 	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)

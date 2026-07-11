@@ -10,7 +10,10 @@ import com.lemonacademy.ecommerce.exception.*;
 import com.lemonacademy.ecommerce.repository.*;
 import com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService;
 import com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService;
+import com.lemonacademy.ecommerce.shipping.service.IcarryEstimateService;
 import com.lemonacademy.ecommerce.shipping.dto.TrackingResponse;
+import com.lemonacademy.ecommerce.shipping.dto.ShippingEstimateRequest;
+import com.lemonacademy.ecommerce.shipping.dto.CourierEstimateResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -32,8 +35,11 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final CouponRepository couponRepository;
+    private final UserCouponRepository userCouponRepository;
     private final IcarryShipmentService icarryShipmentService;
     private final IcarryTrackingService icarryTrackingService;
+    private final IcarryEstimateService icarryEstimateService;
 
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -91,8 +97,11 @@ public class OrderService {
         }
 
         // 3. Validate Stock & Prepare Order Items
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
+
+        int totalWeight = 0;
+        int maxLen = 0, maxBre = 0, maxHei = 0;
 
         Order order = new Order();
         order.setUser(user);
@@ -118,8 +127,14 @@ public class OrderService {
             productRepository.save(product);
 
             // Compute subtotal and add to order items
-            BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-            totalAmount = totalAmount.add(subtotal);
+            BigDecimal itemSubtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            subtotal = subtotal.add(itemSubtotal);
+
+            // Accumulate weight and max dimensions
+            totalWeight += (product.getWeight() != null ? product.getWeight() : 500) * cartItem.getQuantity();
+            maxLen = Math.max(maxLen, product.getLength() != null ? product.getLength() : 10);
+            maxBre = Math.max(maxBre, product.getBreadth() != null ? product.getBreadth() : 10);
+            maxHei = Math.max(maxHei, product.getHeight() != null ? product.getHeight() : 10);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -131,15 +146,92 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
+        // 4. Calculate Shipping Estimate dynamically
+        BigDecimal shippingCharge = BigDecimal.ZERO;
+        try {
+            ShippingEstimateRequest estimateRequest = ShippingEstimateRequest.builder()
+                    .weight(totalWeight)
+                    .length(maxLen)
+                    .breadth(maxBre)
+                    .height(maxHei)
+                    .originPincode("284003") // Default origin from properties
+                    .destinationPincode(address.getPincode())
+                    .parcelValue(subtotal)
+                    .parcelType("P")
+                    .shipmentMode("S")
+                    .build();
+
+            List<CourierEstimateResponse> estimates = icarryEstimateService.getEstimate(estimateRequest);
+            if (estimates != null && !estimates.isEmpty()) {
+                // Find the lowest rate
+                shippingCharge = estimates.stream()
+                        .map(CourierEstimateResponse::getRate)
+                        .min(BigDecimal::compareTo)
+                        .orElse(BigDecimal.valueOf(50));
+            } else {
+                shippingCharge = BigDecimal.valueOf(50); // fallback
+            }
+        } catch (Exception e) {
+            log.error("Failed to get shipping estimate, using fallback: {}", e.getMessage());
+            shippingCharge = BigDecimal.valueOf(50); // fallback
+        }
+
+        // 5. Check and apply coupon
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        Coupon appliedCoupon = null;
+        if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
+            appliedCoupon = couponRepository.findByCode(request.getCouponCode().trim().toUpperCase())
+                    .orElseThrow(() -> new InvalidOperationException("Invalid coupon code"));
+
+            if (!Boolean.TRUE.equals(appliedCoupon.getActive())) {
+                throw new InvalidOperationException("Coupon is no longer active");
+            }
+
+            // First order only restriction: check if user has any orders
+            boolean hasOrders = orderRepository.findByUserOrderByCreatedAtDesc(user, Pageable.unpaged()).hasContent();
+            if (hasOrders) {
+                throw new InvalidOperationException("This coupon is only valid for your first order.");
+            }
+
+            // Check if already used by user (just in case they cancel/retry, though first order check handles most of it)
+            if (userCouponRepository.existsByUserAndCoupon(user, appliedCoupon)) {
+                throw new InvalidOperationException("You have already used this coupon.");
+            }
+
+            // Calculate discount (discountPercentage is e.g. 5.0 for 5%)
+            BigDecimal percentage = appliedCoupon.getDiscountPercentage().divide(BigDecimal.valueOf(100));
+            discountAmount = subtotal.multiply(percentage);
+        }
+
+        BigDecimal totalAmount = subtotal.add(shippingCharge).subtract(discountAmount);
+
+        order.setSubtotal(subtotal);
+        order.setShippingCharge(shippingCharge);
+        order.setDiscountAmount(discountAmount);
+        order.setCouponCode(appliedCoupon != null ? appliedCoupon.getCode() : null);
         order.setTotalAmount(totalAmount);
         order.setItems(orderItems);
+        order.setWeight(totalWeight);
+        order.setLength(maxLen);
+        order.setBreadth(maxBre);
+        order.setHeight(maxHei);
 
-        // 4. Clear Cart items (preserving the cart record itself)
+        // 6. Clear Cart items (preserving the cart record itself)
         cart.getItems().clear();
         cartRepository.save(cart);
 
-        // 5. Save Order
-        return orderRepository.save(order);
+        // 7. Save Order and optionally UserCoupon
+        Order savedOrder = orderRepository.save(order);
+
+        if (appliedCoupon != null) {
+            UserCoupon userCoupon = UserCoupon.builder()
+                    .user(user)
+                    .coupon(appliedCoupon)
+                    .build();
+            userCouponRepository.save(userCoupon);
+        }
+
+        return savedOrder;
     }
 
     @Transactional(readOnly = true)
@@ -242,7 +334,11 @@ public class OrderService {
                 .internalId(order.getId())
                 .userId(order.getUser().getId())
                 .address(addressResponse)
+                .subtotal(order.getSubtotal())
                 .totalAmount(order.getTotalAmount())
+                .shippingCharge(order.getShippingCharge())
+                .discountAmount(order.getDiscountAmount())
+                .couponCode(order.getCouponCode())
                 .status(order.getStatus())
                 .items(itemResponses)
                 .createdAt(order.getCreatedAt())

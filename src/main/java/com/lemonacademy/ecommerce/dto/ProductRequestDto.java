@@ -37,4 +37,9 @@ public class ProductRequestDto {
 
     @NotNull(message = "Category ID is required")
     private UUID categoryId;
+
+    private Integer weight;
+    private Integer length;
+    private Integer breadth;
+    private Integer height;
 }

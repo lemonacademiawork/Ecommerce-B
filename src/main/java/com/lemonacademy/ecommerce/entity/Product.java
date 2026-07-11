@@ -45,6 +45,12 @@ public class Product {
 
     private LocalDateTime updatedAt;
 
+    // Physical dimensions for shipping
+    private Integer weight; // in grams
+    private Integer length; // in cm
+    private Integer breadth; // in cm
+    private Integer height; // in cm
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();

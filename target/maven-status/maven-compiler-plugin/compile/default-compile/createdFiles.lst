@@ -56,6 +56,7 @@ com\lemonacademy\ecommerce\controller\ProductController.class
 com\lemonacademy\ecommerce\dto\OrderItemResponse$OrderItemResponseBuilder.class
 com\lemonacademy\ecommerce\service\WhatsappService.class
 com\lemonacademy\ecommerce\shipping\controller\ShippingController.class
+com\lemonacademy\ecommerce\entity\UserCoupon.class
 com\lemonacademy\ecommerce\dto\LoginRequest.class
 com\lemonacademy\ecommerce\shipping\dto\TrackingResponse$TrackingEvent$TrackingEventBuilder.class
 com\lemonacademy\ecommerce\dto\AdminLoginRequest.class
@@ -84,6 +85,7 @@ com\lemonacademy\ecommerce\security\HttpCookieOAuth2AuthorizationRequestReposito
 com\lemonacademy\ecommerce\shipping\client\IcarryClient.class
 com\lemonacademy\ecommerce\dto\ProductRequestDto$ProductRequestDtoBuilder.class
 com\lemonacademy\ecommerce\config\AdminInitializer.class
+com\lemonacademy\ecommerce\repository\UserCouponRepository.class
 com\lemonacademy\ecommerce\config\CorsConfig.class
 com\lemonacademy\ecommerce\dto\UserProfileResponse.class
 com\lemonacademy\ecommerce\dto\ProductResponseDto$ProductResponseDtoBuilder.class
@@ -92,6 +94,7 @@ com\lemonacademy\ecommerce\shipping\dto\CustomerEstimateRequest.class
 com\lemonacademy\ecommerce\dto\AddressRequest.class
 com\lemonacademy\ecommerce\security\OAuth2AuthenticationSuccessHandler.class
 com\lemonacademy\ecommerce\dto\ImageUploadResponse.class
+com\lemonacademy\ecommerce\repository\CouponRepository.class
 com\lemonacademy\ecommerce\security\JwtAuthenticationFilter.class
 com\lemonacademy\ecommerce\shipping\service\IcarryEstimateService.class
 com\lemonacademy\ecommerce\dto\UserResponse.class
@@ -104,6 +107,7 @@ com\lemonacademy\ecommerce\entity\Address$AddressBuilder.class
 com\lemonacademy\ecommerce\dto\AddressRequest$AddressRequestBuilder.class
 com\lemonacademy\ecommerce\shipping\service\IcarryLabelService.class
 com\lemonacademy\ecommerce\dto\DashboardResponse.class
+com\lemonacademy\ecommerce\entity\Coupon.class
 com\lemonacademy\ecommerce\dto\CategoryDto$CategoryDtoBuilder.class
 com\lemonacademy\ecommerce\service\AuthService.class
 com\lemonacademy\ecommerce\dto\ProductResponseDto.class
@@ -152,8 +156,10 @@ com\lemonacademy\ecommerce\shipping\dto\PickupAddressRequest$PickupAddressReques
 com\lemonacademy\ecommerce\entity\Address.class
 com\lemonacademy\ecommerce\dto\VerifyOtpRequest$VerifyOtpRequestBuilder.class
 com\lemonacademy\ecommerce\entity\Category.class
+com\lemonacademy\ecommerce\entity\UserCoupon$UserCouponBuilder.class
 com\lemonacademy\ecommerce\shipping\service\IcarryPickupService.class
 com\lemonacademy\ecommerce\dto\AdminResponse$AdminResponseBuilder.class
+com\lemonacademy\ecommerce\entity\Coupon$CouponBuilder.class
 com\lemonacademy\ecommerce\shipping\dto\ShippingEstimateRequest.class
 com\lemonacademy\ecommerce\dto\OrderRequest$OrderRequestBuilder.class
 com\lemonacademy\ecommerce\shipping\controller\AdminShippingController.class
