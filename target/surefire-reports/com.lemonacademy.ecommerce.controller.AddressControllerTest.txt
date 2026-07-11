@@ -1,0 +1,15 @@
+-------------------------------------------------------------------------------
+Test set: com.lemonacademy.ecommerce.controller.AddressControllerTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 7.434 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.AddressControllerTest
+com.lemonacademy.ecommerce.controller.AddressControllerTest.setDefaultAddress_Authenticated_Success -- Time elapsed: 0.017 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.lemonacademy.ecommerce.controller.AddressControllerTest.setDefaultAddress_Authenticated_Success(AddressControllerTest.java:171)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

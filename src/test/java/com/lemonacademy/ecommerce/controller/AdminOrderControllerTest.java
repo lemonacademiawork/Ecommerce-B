@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -133,7 +134,7 @@ class AdminOrderControllerTest {
                 .items(Collections.emptyList())
                 .build();
 
-        when(orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED)).thenReturn(updatedResponse);
+        when(orderService.updateOrderStatus("1", OrderStatus.SHIPPED)).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/api/admin/orders/1/status")
                         .with(user(adminUser))
@@ -163,7 +164,7 @@ class AdminOrderControllerTest {
         OrderStatusRequest request = new OrderStatusRequest();
         request.setStatus(OrderStatus.SHIPPED);
 
-        when(orderService.updateOrderStatus(any(UUID.class), any(OrderStatus.class)))
+        when(orderService.updateOrderStatus(anyString(), any(OrderStatus.class)))
                 .thenThrow(new ResourceNotFoundException("Order not found with id: 99"));
 
         mockMvc.perform(put("/api/admin/orders/99/status")

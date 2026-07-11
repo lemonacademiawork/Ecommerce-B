@@ -75,7 +75,7 @@ class ProductControllerTest {
                 .price(new BigDecimal("1500.00"))
                 .stock(10)
                 .active(true)
-                .categoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .categoryId("Electronics")
                 .categoryName("Electronics")
                 .build();
 

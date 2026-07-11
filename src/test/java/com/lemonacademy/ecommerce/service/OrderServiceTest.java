@@ -289,7 +289,7 @@ class OrderServiceTest {
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        OrderResponse response = orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED);
+        OrderResponse response = orderService.updateOrderStatus("23db3d7a-683b-372b-8036-95da3ae5c542", OrderStatus.SHIPPED);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OrderStatus.SHIPPED);
@@ -299,6 +299,6 @@ class OrderServiceTest {
     void updateOrderStatus_NotFound() {
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrderStatus(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), OrderStatus.SHIPPED));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrderStatus("23db3d7a-683b-372b-8036-95da3ae5c542", OrderStatus.SHIPPED));
     }
 }

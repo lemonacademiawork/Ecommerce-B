@@ -1,0 +1,106 @@
+-------------------------------------------------------------------------------
+Test set: com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest
+-------------------------------------------------------------------------------
+Tests run: 9, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.376 s <<< FAILURE! -- in com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest
+com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment -- Time elapsed: 0.018 s <<< ERROR!
+com.lemonacademy.ecommerce.shipping.exception.IcarryApiException: 
+Tracking API failed: 
+Strict stubbing argument mismatch. Please check:
+ - this invocation of 'post' method:
+    client.post(
+    "/api_track_shipment",
+    {"awb" = [AWB123]},
+    true
+);
+    -> at com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService.trackShipment(IcarryTrackingService.java:44)
+ - has following stubbing(s) with different arguments:
+    1. client.post(null, null, false);
+      -> at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment(ShippingServicesTest.java:170)
+Typically, stubbing argument mismatch indicates user mistake when writing tests.
+Mockito fails early so that you can debug potential problem easily.
+However, there are legit scenarios when this exception generates false negative signal:
+  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
+    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
+  - stubbed method is intentionally invoked with different arguments by code under test
+    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
+For more information see javadoc for PotentialStubbingProblem class.
+	at com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService.trackShipment(IcarryTrackingService.java:78)
+	at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment(ShippingServicesTest.java:172)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: org.mockito.exceptions.misusing.PotentialStubbingProblem: 
+Strict stubbing argument mismatch. Please check:
+ - this invocation of 'post' method:
+    client.post(
+    "/api_track_shipment",
+    {"awb" = [AWB123]},
+    true
+);
+    -> at com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService.trackShipment(IcarryTrackingService.java:44)
+ - has following stubbing(s) with different arguments:
+    1. client.post(null, null, false);
+      -> at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testTrackShipment(ShippingServicesTest.java:170)
+Typically, stubbing argument mismatch indicates user mistake when writing tests.
+Mockito fails early so that you can debug potential problem easily.
+However, there are legit scenarios when this exception generates false negative signal:
+  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
+    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
+  - stubbed method is intentionally invoked with different arguments by code under test
+    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
+For more information see javadoc for PotentialStubbingProblem class.
+	at com.lemonacademy.ecommerce.shipping.client.IcarryClient.post(IcarryClient.java:43)
+	at com.lemonacademy.ecommerce.shipping.service.IcarryTrackingService.trackShipment(IcarryTrackingService.java:44)
+	... 4 more
+
+com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess -- Time elapsed: 0.007 s <<< ERROR!
+com.lemonacademy.ecommerce.shipping.exception.IcarryApiException: 
+Booking failed: 
+Strict stubbing argument mismatch. Please check:
+ - this invocation of 'post' method:
+    client.post(
+    "/api_add_shipment_surface",
+    {"consignee[name]" = [John Doe], "consignee[mobile]" = [9876543210], "consignee[address]" = [123 Street ], "consignee[city]" = [New Delhi], "consignee[pincode]" = [110001], "consignee[state]" = [DL], "consignee[country_code]" = [IN], "parcel[type]" = [P], "parcel[value]" = [200.0], "parcel[contents]" = [Item A x2], "weight" = [500], "weight_unit" = [gm], "length" = [10], "breadth" = [10], "height" = [10], "pickup_address_id" = [null]},
+    false
+);
+    -> at com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService.bookShipmentForOrder(IcarryShipmentService.java:101)
+ - has following stubbing(s) with different arguments:
+    1. client.post(null, null, false);
+      -> at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess(ShippingServicesTest.java:115)
+Typically, stubbing argument mismatch indicates user mistake when writing tests.
+Mockito fails early so that you can debug potential problem easily.
+However, there are legit scenarios when this exception generates false negative signal:
+  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
+    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
+  - stubbed method is intentionally invoked with different arguments by code under test
+    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
+For more information see javadoc for PotentialStubbingProblem class.
+	at com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService.bookShipmentForOrder(IcarryShipmentService.java:148)
+	at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess(ShippingServicesTest.java:120)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: org.mockito.exceptions.misusing.PotentialStubbingProblem: 
+Strict stubbing argument mismatch. Please check:
+ - this invocation of 'post' method:
+    client.post(
+    "/api_add_shipment_surface",
+    {"consignee[name]" = [John Doe], "consignee[mobile]" = [9876543210], "consignee[address]" = [123 Street ], "consignee[city]" = [New Delhi], "consignee[pincode]" = [110001], "consignee[state]" = [DL], "consignee[country_code]" = [IN], "parcel[type]" = [P], "parcel[value]" = [200.0], "parcel[contents]" = [Item A x2], "weight" = [500], "weight_unit" = [gm], "length" = [10], "breadth" = [10], "height" = [10], "pickup_address_id" = [null]},
+    false
+);
+    -> at com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService.bookShipmentForOrder(IcarryShipmentService.java:101)
+ - has following stubbing(s) with different arguments:
+    1. client.post(null, null, false);
+      -> at com.lemonacademy.ecommerce.shipping.service.ShippingServicesTest.testBookShipmentSuccess(ShippingServicesTest.java:115)
+Typically, stubbing argument mismatch indicates user mistake when writing tests.
+Mockito fails early so that you can debug potential problem easily.
+However, there are legit scenarios when this exception generates false negative signal:
+  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
+    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
+  - stubbed method is intentionally invoked with different arguments by code under test
+    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
+For more information see javadoc for PotentialStubbingProblem class.
+	at com.lemonacademy.ecommerce.shipping.client.IcarryClient.post(IcarryClient.java:43)
+	at com.lemonacademy.ecommerce.shipping.service.IcarryShipmentService.bookShipmentForOrder(IcarryShipmentService.java:101)
+	... 4 more
+

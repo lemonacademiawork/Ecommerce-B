@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: com.lemonacademy.ecommerce.controller.AdminDashboardControllerTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.592 s <<< FAILURE! -- in com.lemonacademy.ecommerce.controller.AdminDashboardControllerTest
+com.lemonacademy.ecommerce.controller.AdminDashboardControllerTest.getDashboard_AsAdmin_Success -- Time elapsed: 0.029 s <<< FAILURE!
+java.lang.AssertionError: JSON path "$.data.totalUsers" expected:<100> but was:<10>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:123)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.lemonacademy.ecommerce.controller.AdminDashboardControllerTest.getDashboard_AsAdmin_Success(AdminDashboardControllerTest.java:73)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

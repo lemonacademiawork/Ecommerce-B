@@ -112,7 +112,7 @@ public class ShippingServicesTest {
     @Test
     void testBookShipmentSuccess() {
         String responseJson = "{\"shipment_id\":\"SHIP123\",\"awb\":\"AWB123\",\"courier_name\":\"FedEx\",\"charge\":150.00}";
-        when(client.post(eq("/api_book_shipment"), any(), eq(false))).thenReturn(responseJson);
+        when(client.post(eq("/api_add_shipment_surface"), any(), eq(false))).thenReturn(responseJson);
         when(config.getDefaultDimensions()).thenReturn("10x10x10");
         when(config.getDefaultWeight()).thenReturn(500);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -167,7 +167,7 @@ public class ShippingServicesTest {
     @Test
     void testTrackShipment() {
         String responseJson = "{\"status\":\"IN_TRANSIT\",\"courier\":\"FedEx\",\"shipment_id\":\"SHIP123\",\"history\":[{\"time\":\"2026-07-09 10:00\",\"location\":\"Delhi\",\"activity\":\"Picked up\"}]}";
-        when(client.post(eq("/api_track"), any(), eq(true))).thenReturn(responseJson);
+        when(client.post(eq("/api_track_shipment"), any(), eq(true))).thenReturn(responseJson);
 
         TrackingResponse response = trackingService.trackShipment("AWB123");
 
