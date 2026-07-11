@@ -29,9 +29,9 @@ public class PaymentController {
     @GetMapping("/qr")
     public ResponseEntity<ApiResponse<QrDetailsResponse>> getQrDetails() {
         QrDetailsResponse response = QrDetailsResponse.builder()
-                .merchantName("Lemon House")
-                .upiId("lemonhouse@okaxis")
-                .qrImageUrl("https://cloudinary.com/qr.png") // Note: In production, fetch this from settings or Cloudinary directly
+                .merchantName("MANISHI NIGAM")
+                .upiId("")
+                .qrImageUrl("/images/qr.jpeg")
                 .build();
         return ResponseEntity.ok(ApiResponse.success("QR Details retrieved successfully", response));
     }
