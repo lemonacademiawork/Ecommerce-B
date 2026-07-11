@@ -338,9 +338,11 @@ public class OrderService {
                 .createdAt(order.getAddress().getCreatedAt())
                 .build();
 
+        String displayId = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getId() != null ? order.getId().toString() : null);
+
         return OrderResponse.builder()
-                .id(order.getOrderNumber())
-                .orderNumber(order.getOrderNumber())
+                .id(displayId)
+                .orderNumber(displayId)
                 .internalId(order.getId())
                 .userId(order.getUser().getId())
                 .address(addressResponse)
