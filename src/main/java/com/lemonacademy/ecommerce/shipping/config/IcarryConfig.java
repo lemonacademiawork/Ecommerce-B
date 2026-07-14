@@ -34,7 +34,7 @@ public class IcarryConfig {
     @Value("${icarry.pickup-address-id:PRIMARY}")
     private String pickupAddressId;
 
-    @Value("${icarry.origin-pincode:110001}")
+    @Value("${icarry.origin-pincode:284003}")
     private String originPincode;
 
     @Bean(name = "icarryRestClient")
