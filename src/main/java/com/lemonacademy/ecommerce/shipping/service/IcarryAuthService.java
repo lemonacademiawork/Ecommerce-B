@@ -68,9 +68,16 @@ public class IcarryAuthService {
     private String login() {
         log.info("Authenticating with iCarry API at {}/api_login for user: {}", config.getBaseUrl(), config.getUsername());
         
+        String username = config.getUsername() != null ? config.getUsername().trim() : null;
+        String apiKey = config.getApiKey() != null ? config.getApiKey().trim() : null;
+        log.info("DEBUG Auth - Username: '{}', Key Length: {}, Key Starts With: {}", 
+                 username, 
+                 (apiKey != null ? apiKey.length() : 0), 
+                 (apiKey != null && apiKey.length() > 3 ? apiKey.substring(0, 3) + "..." : "null/short"));
+
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("username", config.getUsername());
-        map.add("key", config.getApiKey()); // iCarry uses username and key
+        map.add("username", username);
+        map.add("key", apiKey); // iCarry uses username and key
 
         try {
             long startTime = System.currentTimeMillis();
