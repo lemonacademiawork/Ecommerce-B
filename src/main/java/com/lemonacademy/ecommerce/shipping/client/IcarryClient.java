@@ -100,10 +100,17 @@ public class IcarryClient {
                         .toEntity(String.class);
 
                 long duration = System.currentTimeMillis() - startTime;
+                String responseBody = response.getBody();
                 log.info("[iCarry API Response] CorrelationID: {}, Status: {}, Time: {}ms, Body: {}",
-                        correlationId, response.getStatusCode(), duration, response.getBody());
+                        correlationId, response.getStatusCode(), duration, responseBody);
 
-                return response.getBody();
+                if (responseBody != null && responseBody.contains("\"success\":0") && 
+                    responseBody.toLowerCase().contains("token") && 
+                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid"))) {
+                    throw new IcarryApiException("Token expired or invalid in 200 OK response", 401);
+                }
+
+                return responseBody;
 
             } catch (IcarryApiException e) {
                 long duration = System.currentTimeMillis() - startTime;
@@ -147,8 +154,16 @@ public class IcarryClient {
                         .toEntity(String.class);
 
                 long duration = System.currentTimeMillis() - startTime;
+                String responseBody = response.getBody();
                 log.info("[iCarry API Response] CorrelationID: {}, Status: {}, Time: {}ms", correlationId, response.getStatusCode(), duration);
-                return response.getBody();
+
+                if (responseBody != null && responseBody.contains("\"success\":0") && 
+                    responseBody.toLowerCase().contains("token") && 
+                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid"))) {
+                    throw new IcarryApiException("Token expired or invalid in 200 OK response", 401);
+                }
+
+                return responseBody;
             } catch (Exception e) {
                 log.error("[iCarry API Error] CorrelationID: {}, Message: {}", correlationId, e.getMessage());
                 if (e instanceof IcarryApiException) throw (IcarryApiException) e;

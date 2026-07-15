@@ -118,10 +118,10 @@ public class IcarryAuthService {
                 String token = root.get("api_token").asText();
                 log.info("Successfully authenticated with iCarry.");
                 
-                // Cache in Redis for 50 minutes (3000 seconds) - iCarry token is valid for 60 minutes
+                // Cache in Redis for 45 minutes (2700 seconds) - iCarry token is valid for 60 minutes
                 try {
                     if (redisService != null) {
-                        redisService.set(TOKEN_KEY, token, 3000);
+                        redisService.set(TOKEN_KEY, token, 2700);
                     }
                 } catch (Exception e) {
                     log.warn("Failed to cache token in Redis: {}", e.getMessage());
