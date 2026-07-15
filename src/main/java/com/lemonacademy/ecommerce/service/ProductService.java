@@ -88,6 +88,10 @@ public class ProductService {
                 .imageUrl(dto.getImageUrl())
                 .active(dto.getActive() != null ? dto.getActive() : true)
                 .category(category)
+                .weight(dto.getWeight())
+                .length(dto.getLength())
+                .breadth(dto.getBreadth())
+                .height(dto.getHeight())
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -111,6 +115,10 @@ public class ProductService {
             product.setActive(dto.getActive());
         }
         product.setCategory(category);
+        product.setWeight(dto.getWeight());
+        product.setLength(dto.getLength());
+        product.setBreadth(dto.getBreadth());
+        product.setHeight(dto.getHeight());
 
         Product updatedProduct = productRepository.save(product);
         return convertToDto(updatedProduct);
@@ -139,10 +147,14 @@ public class ProductService {
                 .stock(product.getStock())
                 .imageUrl(product.getImageUrl())
                 .active(product.getActive())
-                .categoryId(product.getCategory() != null ? product.getCategory().getName() : "")
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
+                .weight(product.getWeight())
+                .length(product.getLength())
+                .breadth(product.getBreadth())
+                .height(product.getHeight())
                 .build();
     }
 }

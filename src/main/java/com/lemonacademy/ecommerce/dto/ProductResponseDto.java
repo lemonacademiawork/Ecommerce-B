@@ -23,7 +23,7 @@ public class ProductResponseDto {
     private Integer stock;
     private String imageUrl;
     private Boolean active;
-    private String categoryId;
+    private UUID categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
