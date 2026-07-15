@@ -75,7 +75,7 @@ class ProductControllerTest {
                 .price(new BigDecimal("1500.00"))
                 .stock(10)
                 .active(true)
-                .categoryId("Electronics")
+                .categoryId(UUID.randomUUID())
                 .categoryName("Electronics")
                 .build();
 
