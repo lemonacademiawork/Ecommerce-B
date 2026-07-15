@@ -53,17 +53,23 @@ public class ShippingController {
                 if (cart != null && !cart.getItems().isEmpty()) {
                     int totalWeight = 0;
                     int maxLen = 0, maxBre = 0, maxHei = 0;
+                    long totalVolume = 0;
                     for (CartItem item : cart.getItems()) {
                         Product p = item.getProduct();
-                        totalWeight += (p.getWeight() != null ? p.getWeight() : icarryConfig.getDefaultWeight()) * item.getQuantity();
-                        maxLen = Math.max(maxLen, p.getLength() != null ? p.getLength() : 10);
-                        maxBre = Math.max(maxBre, p.getBreadth() != null ? p.getBreadth() : 10);
-                        maxHei = Math.max(maxHei, p.getHeight() != null ? p.getHeight() : 10);
+                        int w = p.getWeight() != null ? p.getWeight() : icarryConfig.getDefaultWeight();
+                        int l = p.getLength() != null ? p.getLength() : 10;
+                        int b = p.getBreadth() != null ? p.getBreadth() : 10;
+                        int h = p.getHeight() != null ? p.getHeight() : 10;
+                        
+                        totalWeight += w * item.getQuantity();
+                        totalVolume += (long) l * b * h * item.getQuantity();
+                        maxLen = Math.max(maxLen, l);
+                        maxBre = Math.max(maxBre, b);
                     }
                     weight = totalWeight;
-                    length = maxLen;
-                    breadth = maxBre;
-                    height = maxHei;
+                    length = maxLen > 0 ? maxLen : 10;
+                    breadth = maxBre > 0 ? maxBre : 10;
+                    height = (int) Math.max(10, Math.ceil((double) totalVolume / (length * breadth)));
                     log.info("Calculated total shipping weight from cart: {}g", weight);
                 }
             }

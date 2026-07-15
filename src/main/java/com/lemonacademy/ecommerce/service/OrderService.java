@@ -101,7 +101,8 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         int totalWeight = 0;
-        int maxLen = 0, maxBre = 0, maxHei = 0;
+        int maxLen = 0, maxBre = 0;
+        long totalVolume = 0;
 
         Order order = new Order();
         order.setUser(user);
@@ -131,10 +132,14 @@ public class OrderService {
             subtotal = subtotal.add(itemSubtotal);
 
             // Accumulate weight and max dimensions
+            int l = product.getLength() != null ? product.getLength() : 10;
+            int b = product.getBreadth() != null ? product.getBreadth() : 10;
+            int h = product.getHeight() != null ? product.getHeight() : 10;
+            
             totalWeight += (product.getWeight() != null ? product.getWeight() : 500) * cartItem.getQuantity();
-            maxLen = Math.max(maxLen, product.getLength() != null ? product.getLength() : 10);
-            maxBre = Math.max(maxBre, product.getBreadth() != null ? product.getBreadth() : 10);
-            maxHei = Math.max(maxHei, product.getHeight() != null ? product.getHeight() : 10);
+            totalVolume += (long) l * b * h * cartItem.getQuantity();
+            maxLen = Math.max(maxLen, l);
+            maxBre = Math.max(maxBre, b);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -147,13 +152,17 @@ public class OrderService {
         }
 
         // 4. Calculate Shipping Estimate dynamically
+        int finalLen = maxLen > 0 ? maxLen : 10;
+        int finalBre = maxBre > 0 ? maxBre : 10;
+        int finalHei = (int) Math.max(10, Math.ceil((double) totalVolume / (finalLen * finalBre)));
+        
         BigDecimal shippingCharge = BigDecimal.ZERO;
         try {
             ShippingEstimateRequest estimateRequest = ShippingEstimateRequest.builder()
                     .weight(totalWeight)
-                    .length(maxLen)
-                    .breadth(maxBre)
-                    .height(maxHei)
+                    .length(finalLen)
+                    .breadth(finalBre)
+                    .height(finalHei)
                     .originPincode("284003") // Default origin from properties
                     .destinationPincode(address.getPincode())
                     .parcelValue(subtotal)
@@ -212,9 +221,9 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setItems(orderItems);
         order.setWeight(totalWeight);
-        order.setLength(maxLen);
-        order.setBreadth(maxBre);
-        order.setHeight(maxHei);
+        order.setLength(finalLen);
+        order.setBreadth(finalBre);
+        order.setHeight(finalHei);
 
         // 6. Clear Cart items (preserving the cart record itself)
         cart.getItems().clear();

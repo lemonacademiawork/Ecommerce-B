@@ -60,7 +60,7 @@ public class IcarryEstimateService {
                  config.getOriginPincode(), request.getDestinationPincode(), weight);
         body.add("origin_country_code", request.getOriginCountryCode() != null ? request.getOriginCountryCode() : "IN");
         body.add("destination_country_code", request.getDestinationCountryCode() != null ? request.getDestinationCountryCode() : "IN");
-        body.add("shipment_mode", request.getShipmentMode() != null ? request.getShipmentMode() : "E");
+        body.add("shipment_mode", request.getShipmentMode() != null ? request.getShipmentMode() : "S");
         body.add("shipment_type", request.getParcelType() != null ? request.getParcelType() : "P");
         body.add("shipment_value", request.getParcelValue() != null && request.getParcelValue().compareTo(java.math.BigDecimal.ZERO) > 0 ? request.getParcelValue().toString() : "100.00");
 
