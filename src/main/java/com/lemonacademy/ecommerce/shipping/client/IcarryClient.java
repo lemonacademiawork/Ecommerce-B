@@ -45,19 +45,35 @@ public class IcarryClient {
             String token = authService.getApiToken();
             String uri = path + (path.contains("?") ? "&" : "?") + "api_token=" + token;
 
-            log.info("[iCarry API Request] CorrelationID: {}, URL: {}{}, Body: {}",
-                    correlationId, config.getBaseUrl(), path, maskSensitiveData(body));
-
+            String rawBodyForLog;
             long startTime = System.currentTimeMillis();
             try {
                 RestClient.RequestBodySpec requestSpec = restClient.post().uri(uri);
 
                 if (body instanceof MultiValueMap) {
-                    requestSpec.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                            .body((MultiValueMap<?, ?>) body);
+                    MultiValueMap<?, ?> map = (MultiValueMap<?, ?>) body;
+                    StringBuilder sb = new StringBuilder();
+                    for (java.util.Map.Entry<?, ? extends java.util.List<?>> entry : map.entrySet()) {
+                        for (Object val : entry.getValue()) {
+                            if (sb.length() > 0) sb.append("&");
+                            sb.append(java.net.URLEncoder.encode(String.valueOf(entry.getKey()), java.nio.charset.StandardCharsets.UTF_8));
+                            sb.append("=");
+                            if (val != null) {
+                                sb.append(java.net.URLEncoder.encode(String.valueOf(val), java.nio.charset.StandardCharsets.UTF_8));
+                            }
+                        }
+                    }
+                    String formBody = sb.toString();
+                    requestSpec.contentType(MediaType.APPLICATION_FORM_URLENCODED).body(formBody);
+                    rawBodyForLog = maskSensitiveData(formBody).toString();
                 } else {
                     requestSpec.contentType(MediaType.APPLICATION_JSON).body(body);
+                    rawBodyForLog = maskSensitiveData(body).toString();
                 }
+
+                log.info("[iCarry API Request] CorrelationID: {}, URL: {}{}, Body: {}",
+                        correlationId, config.getBaseUrl(), path, rawBodyForLog);
+
 
                 ResponseEntity<String> response = requestSpec
                         .retrieve()
