@@ -54,8 +54,8 @@ public class IcarryEstimateService {
         body.add("breadth", String.valueOf(breadth));
         body.add("height", String.valueOf(height));
         body.add("weight", String.valueOf(weight));
-        body.add("from_pincode", config.getOriginPincode());
-        body.add("to_pincode", request.getDestinationPincode());
+        body.add("origin_pincode", config.getOriginPincode());
+        body.add("destination_pincode", request.getDestinationPincode());
         log.info("Constructed iCarry estimate payload: from={}, to={}, weight={}", 
                  config.getOriginPincode(), request.getDestinationPincode(), weight);
         body.add("origin_country_code", request.getOriginCountryCode() != null ? request.getOriginCountryCode() : "IN");
