@@ -22,6 +22,7 @@ public class ProductResponseDto {
     private BigDecimal price;
     private Integer stock;
     private String imageUrl;
+    private java.util.List<String> imageUrls;
     private Boolean active;
     private UUID categoryId;
     private String categoryName;

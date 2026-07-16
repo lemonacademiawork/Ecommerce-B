@@ -32,6 +32,10 @@ public class ProductRequestDto {
     private Integer stock;
 
     private String imageUrl;
+    
+    private java.util.List<String> imageUrls;
+    
+    private java.util.List<String> existingImageUrls;
 
     private Boolean active;
 

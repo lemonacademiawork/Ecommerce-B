@@ -19,6 +19,7 @@ public class CartItemResponse {
     private UUID productId;
     private String productName;
     private String imageUrl;
+    private java.util.List<String> imageUrls;
     private BigDecimal price;
     private Integer quantity;
     private BigDecimal subtotal;

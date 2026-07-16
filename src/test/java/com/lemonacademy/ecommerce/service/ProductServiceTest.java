@@ -41,6 +41,9 @@ class ProductServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private CloudinaryService cloudinaryService;
+
     @InjectMocks
     private ProductService productService;
 
@@ -62,7 +65,7 @@ class ProductServiceTest {
                 .description("Gaming Laptop")
                 .price(new BigDecimal("1500.00"))
                 .stock(10)
-                .imageUrl("http://example.com/laptop.jpg")
+                .imageUrls(java.util.Collections.singletonList("http://example.com/laptop.jpg"))
                 .active(true)
                 .category(category)
                 .build();

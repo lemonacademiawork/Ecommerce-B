@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ImageUploadResponse {
     private String imageUrl;
+    private java.util.List<String> imageUrls;
 }

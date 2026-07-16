@@ -1,6 +1,8 @@
 package com.lemonacademy.ecommerce.entity;
 
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,7 +35,16 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    private String imageUrl;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
+
+    @Transient
+    public String getImageUrl() {
+        return (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.get(0) : null;
+    }
 
     private Boolean active = true;
 
