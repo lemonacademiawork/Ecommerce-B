@@ -142,7 +142,7 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
-        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        order.setStatus(OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.PENDING);
 
         for (CartItemTuple tuple : itemsToProcess) {
