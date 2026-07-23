@@ -1,7 +1,5 @@
 package com.lemonacademy.ecommerce.dto;
 
-import java.util.UUID;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,34 +14,32 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductRequestDto {
+public class ProductVariantRequestDto {
 
-    @NotBlank(message = "Product name is required")
-    private String name;
+    @NotBlank(message = "Variant name is required")
+    private String variantName;
 
-    private String description;
+    private Integer weight;
+    private String weightUnit;
+    
+    private Integer volume;
+    private String volumeUnit;
+    
+    private String sizeLabel;
 
+    @NotNull(message = "Variant price is required")
     @Min(value = 0, message = "Price must be greater than or equal to 0")
     private BigDecimal price;
 
+    private BigDecimal discountedPrice;
+
+    @NotNull(message = "Variant stock is required")
     @Min(value = 0, message = "Stock must be greater than or equal to 0")
     private Integer stock;
 
-    private String imageUrl;
+    private String sku;
+    private String barcode;
     
-    private java.util.List<String> imageUrls;
-    
-    private java.util.List<String> existingImageUrls;
-
-    private Boolean active;
-    
-    private Boolean hasVariants;
-
-    @NotNull(message = "Category ID is required")
-    private UUID categoryId;
-
-    private Integer weight;
-    private Integer length;
-    private Integer breadth;
-    private Integer height;
+    @Builder.Default
+    private Boolean status = true;
 }

@@ -23,6 +23,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Value("${app.frontend.url:https://ecommercef-ten.vercel.app}")
     private String frontendUrl;
@@ -42,6 +43,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String sub = oAuth2User.getAttribute("sub");
 
         if (email == null) {
+            clearAuthenticationAttributes(request, response);
             getRedirectStrategy().sendRedirect(request, response, 
                 UriComponentsBuilder.fromUriString(frontendUrl + "/oauth-failure")
                         .queryParam("error", "Email not found from Google provider")
@@ -82,6 +84,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .queryParam("token", token)
                 .build().encode().toUriString();
 
+        clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    /**
+     * Removes the OAuth2 authorization request cookies to prevent stale state
+     * on subsequent login attempts.
+     */
+    private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
+        super.clearAuthenticationAttributes(request);
+        cookieAuthorizationRequestRepository.removeAuthorizationRequest(request, response);
     }
 }

@@ -7,8 +7,12 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.io.IOException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
+import com.lemonacademy.ecommerce.dto.ProductVariantResponseDto;
 import com.lemonacademy.ecommerce.entity.Category;
 import com.lemonacademy.ecommerce.entity.Product;
 import com.lemonacademy.ecommerce.exception.ResourceNotFoundException;
@@ -28,17 +32,15 @@ public class ProductService {
     private final CloudinaryService cloudinaryService;
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public PageResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getActiveProducts() {
-        return productRepository.findAllByActiveTrue().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public PageResponseDto<ProductResponseDto> getActiveProducts(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAllByActiveTrue(pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     @Transactional(readOnly = true)
@@ -49,33 +51,29 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getProductsByCategory(UUID categoryId) {
+    public PageResponseDto<ProductResponseDto> getProductsByCategory(UUID categoryId, Pageable pageable) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
-        return productRepository.findAllByCategoryId(categoryId).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        Page<Product> productPage = productRepository.findAllByCategoryId(categoryId, pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getActiveProductsByCategory(UUID categoryId) {
+    public PageResponseDto<ProductResponseDto> getActiveProductsByCategory(UUID categoryId, Pageable pageable) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
-        return productRepository.findAllByCategoryIdAndActiveTrue(categoryId).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        Page<Product> productPage = productRepository.findAllByCategoryIdAndActiveTrue(categoryId, pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> searchProducts(String query, Boolean activeOnly) {
-        List<Product> products = (activeOnly != null && activeOnly)
-                ? productRepository.searchActiveProducts(query)
-                : productRepository.searchProducts(query);
-        return products.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public PageResponseDto<ProductResponseDto> searchProducts(String query, Boolean activeOnly, Pageable pageable) {
+        Page<Product> productPage = (activeOnly != null && activeOnly)
+                ? productRepository.searchActiveProducts(query, pageable)
+                : productRepository.searchProducts(query, pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     @Transactional
@@ -101,6 +99,7 @@ public class ProductService {
                     .stock(dto.getStock())
                     .imageUrls(uploadedUrls != null ? uploadedUrls : new ArrayList<>())
                     .active(dto.getActive() != null ? dto.getActive() : true)
+                    .hasVariants(dto.getHasVariants() != null ? dto.getHasVariants() : false)
                     .category(category)
                     .weight(dto.getWeight())
                     .length(dto.getLength())
@@ -143,6 +142,9 @@ public class ProductService {
         if (dto.getActive() != null) {
             product.setActive(dto.getActive());
         }
+        if (dto.getHasVariants() != null) {
+            product.setHasVariants(dto.getHasVariants());
+        }
         product.setCategory(category);
         product.setWeight(dto.getWeight());
         product.setLength(dto.getLength());
@@ -170,10 +172,9 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return productRepository.findAllByPriceBetweenAndActiveTrue(minPrice, maxPrice).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public PageResponseDto<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        Page<Product> productPage = productRepository.findAllByPriceBetweenAndActiveTrue(minPrice, maxPrice, pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
     }
 
     private void validateImages(List<MultipartFile> newImages, List<String> retainedImages) {
@@ -237,6 +238,7 @@ public class ProductService {
                 .imageUrl(product.getImageUrl())
                 .imageUrls(product.getImageUrls())
                 .active(product.getActive())
+                .hasVariants(product.getHasVariants() != null ? product.getHasVariants() : false)
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .createdAt(product.getCreatedAt())
@@ -245,6 +247,24 @@ public class ProductService {
                 .length(product.getLength())
                 .breadth(product.getBreadth())
                 .height(product.getHeight())
+                .variants(product.getVariants() != null ? product.getVariants().stream().map(v -> ProductVariantResponseDto.builder()
+                        .id(v.getId())
+                        .productId(v.getProduct().getId())
+                        .variantName(v.getVariantName())
+                        .weight(v.getWeight())
+                        .weightUnit(v.getWeightUnit())
+                        .volume(v.getVolume())
+                        .volumeUnit(v.getVolumeUnit())
+                        .sizeLabel(v.getSizeLabel())
+                        .price(v.getPrice())
+                        .discountedPrice(v.getDiscountedPrice())
+                        .stock(v.getStock())
+                        .sku(v.getSku())
+                        .barcode(v.getBarcode())
+                        .status(v.getStatus())
+                        .createdAt(v.getCreatedAt())
+                        .updatedAt(v.getUpdatedAt())
+                        .build()).collect(Collectors.toList()) : new ArrayList<>())
                 .build();
     }
 }

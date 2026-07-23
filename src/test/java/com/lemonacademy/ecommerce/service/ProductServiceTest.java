@@ -82,23 +82,27 @@ class ProductServiceTest {
 
     @Test
     void getAllProducts_Success() {
-        when(productRepository.findAll()).thenReturn(Collections.singletonList(product));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
+        when(productRepository.findAll(any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.getAllProducts();
+        PageResponseDto<ProductResponseDto> response = productService.getAllProducts(pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0).getName()).isEqualTo("Laptop");
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getContent().get(0).getName()).isEqualTo("Laptop");
     }
 
     @Test
     void getActiveProducts_Success() {
-        when(productRepository.findAllByActiveTrue()).thenReturn(Collections.singletonList(product));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
+        when(productRepository.findAllByActiveTrue(any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.getActiveProducts();
+        PageResponseDto<ProductResponseDto> response = productService.getActiveProducts(pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
     }
 
     @Test
@@ -120,40 +124,47 @@ class ProductServiceTest {
 
     @Test
     void getProductsByCategory_Success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
         when(categoryRepository.existsById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(true);
-        when(productRepository.findAllByCategoryId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Collections.singletonList(product));
+        when(productRepository.findAllByCategoryId(eq(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")), any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        PageResponseDto<ProductResponseDto> response = productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
     }
 
     @Test
     void getProductsByCategory_CategoryNotFound() {
+        Pageable pageable = PageRequest.of(0, 10);
         when(categoryRepository.existsById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")));
+        assertThrows(ResourceNotFoundException.class, () -> productService.getProductsByCategory(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"), pageable));
     }
 
     @Test
     void searchProducts_ActiveOnly() {
-        when(productRepository.searchActiveProducts("Lap")).thenReturn(Collections.singletonList(product));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
+        when(productRepository.searchActiveProducts(eq("Lap"), any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.searchProducts("Lap", true);
+        PageResponseDto<ProductResponseDto> response = productService.searchProducts("Lap", true, pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
     }
 
     @Test
     void searchProducts_All() {
-        when(productRepository.searchProducts("Lap")).thenReturn(Collections.singletonList(product));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
+        when(productRepository.searchProducts(eq("Lap"), any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.searchProducts("Lap", false);
+        PageResponseDto<ProductResponseDto> response = productService.searchProducts("Lap", false, pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
     }
 
     @Test
@@ -210,12 +221,14 @@ class ProductServiceTest {
     void getProductsByPriceRange_Success() {
         BigDecimal minPrice = new BigDecimal("1000.00");
         BigDecimal maxPrice = new BigDecimal("2000.00");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
 
-        when(productRepository.findAllByPriceBetweenAndActiveTrue(minPrice, maxPrice)).thenReturn(Collections.singletonList(product));
+        when(productRepository.findAllByPriceBetweenAndActiveTrue(eq(minPrice), eq(maxPrice), any(Pageable.class))).thenReturn(productPage);
 
-        java.util.List<ProductResponseDto> response = productService.getProductsByPriceRange(minPrice, maxPrice);
+        PageResponseDto<ProductResponseDto> response = productService.getProductsByPriceRange(minPrice, maxPrice, pageable);
 
         assertThat(response).isNotNull();
-        assertThat(response).hasSize(1);
+        assertThat(response.getContent()).hasSize(1);
     }
 }

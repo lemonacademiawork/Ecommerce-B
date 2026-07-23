@@ -40,6 +40,7 @@ public class OrderService {
     private final IcarryShipmentService icarryShipmentService;
     private final IcarryTrackingService icarryTrackingService;
     private final IcarryEstimateService icarryEstimateService;
+    private final ProductVariantRepository productVariantRepository;
 
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -80,12 +81,46 @@ public class OrderService {
     public Order saveOrderInTransaction(OrderRequest request) {
         User user = getAuthenticatedUser();
 
-        // 1. Fetch Cart and validate it's not empty
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new InvalidOperationException("Cart is empty"));
+        // 1. Determine items source: database cart OR request body items
+        // Try database cart first
+        Cart cart = cartRepository.findByUser(user).orElse(null);
+        boolean hasDbCart = cart != null && !cart.getItems().isEmpty();
+        boolean hasRequestItems = request.getItems() != null && !request.getItems().isEmpty();
 
-        if (cart.getItems().isEmpty()) {
+        if (!hasDbCart && !hasRequestItems) {
             throw new InvalidOperationException("Cart is empty");
+        }
+
+        // Build a unified list of (product, variant, quantity) tuples to process
+        List<CartItemTuple> itemsToProcess = new ArrayList<>();
+
+        if (hasDbCart) {
+            // Use database cart items
+            for (CartItem cartItem : cart.getItems()) {
+                itemsToProcess.add(new CartItemTuple(
+                        cartItem.getProduct(),
+                        cartItem.getProductVariant(),
+                        cartItem.getQuantity()));
+            }
+        } else {
+            // Use request body items
+            for (OrderItemRequest itemReq : request.getItems()) {
+                Product product = productRepository.findById(itemReq.getProductId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Product not found with id: " + itemReq.getProductId()));
+
+                ProductVariant variant = null;
+                if (itemReq.getVariantId() != null) {
+                    variant = productVariantRepository.findById(itemReq.getVariantId())
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Variant not found with id: " + itemReq.getVariantId()));
+                    if (!variant.getProduct().getId().equals(product.getId())) {
+                        throw new InvalidOperationException("Variant does not belong to product: " + product.getName());
+                    }
+                }
+
+                itemsToProcess.add(new CartItemTuple(product, variant, itemReq.getQuantity()));
+            }
         }
 
         // 2. Fetch Address & Validate Ownership
@@ -107,28 +142,40 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        order.setPaymentStatus(PaymentStatus.PENDING);
 
-        for (CartItem cartItem : cart.getItems()) {
-            Product product = cartItem.getProduct();
+        for (CartItemTuple tuple : itemsToProcess) {
+            Product product = tuple.product;
 
             // Validate product is active
             if (!Boolean.TRUE.equals(product.getActive())) {
                 throw new InvalidOperationException("Cannot order inactive product: " + product.getName());
             }
 
+            ProductVariant variant = tuple.variant;
+
             // Validate stock
-            if (cartItem.getQuantity() > product.getStock()) {
+            int availableStock = variant != null ? variant.getStock() : product.getStock();
+            if (tuple.quantity > availableStock) {
                 throw new InsufficientStockException(
-                        "Insufficient stock for product " + product.getName() + ". Available: " + product.getStock());
+                        "Insufficient stock for product " + product.getName() + 
+                        (variant != null ? " (" + variant.getVariantName() + ")" : "") + 
+                        ". Available: " + availableStock);
             }
 
             // Reduce Stock
-            product.setStock(product.getStock() - cartItem.getQuantity());
-            productRepository.save(product);
+            if (variant != null) {
+                variant.setStock(variant.getStock() - tuple.quantity);
+                productVariantRepository.save(variant);
+            } else {
+                product.setStock(product.getStock() - tuple.quantity);
+                productRepository.save(product);
+            }
 
+            BigDecimal itemPrice = variant != null ? variant.getPrice() : product.getPrice();
             // Compute subtotal and add to order items
-            BigDecimal itemSubtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            BigDecimal itemSubtotal = itemPrice.multiply(BigDecimal.valueOf(tuple.quantity));
             subtotal = subtotal.add(itemSubtotal);
 
             // Accumulate weight and max dimensions
@@ -136,16 +183,20 @@ public class OrderService {
             int b = product.getBreadth() != null ? product.getBreadth() : 10;
             int h = product.getHeight() != null ? product.getHeight() : 10;
             
-            totalWeight += (product.getWeight() != null ? product.getWeight() : 500) * cartItem.getQuantity();
-            totalVolume += (long) l * b * h * cartItem.getQuantity();
+            int w = variant != null && variant.getWeight() != null ? variant.getWeight() : (product.getWeight() != null ? product.getWeight() : 500);
+            
+            totalWeight += w * tuple.quantity;
+            totalVolume += (long) l * b * h * tuple.quantity;
             maxLen = Math.max(maxLen, l);
             maxBre = Math.max(maxBre, b);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .product(product)
-                    .quantity(cartItem.getQuantity())
-                    .price(product.getPrice())
+                    .productVariant(variant)
+                    .variantName(variant != null ? variant.getVariantName() : null)
+                    .quantity(tuple.quantity)
+                    .price(itemPrice)
                     .build();
 
             orderItems.add(orderItem);
@@ -225,9 +276,11 @@ public class OrderService {
         order.setBreadth(finalBre);
         order.setHeight(finalHei);
 
-        // 6. Clear Cart items (preserving the cart record itself)
-        cart.getItems().clear();
-        cartRepository.save(cart);
+        // 6. Clear Cart items (only if database cart was the source)
+        if (hasDbCart && cart != null) {
+            cart.getItems().clear();
+            cartRepository.save(cart);
+        }
 
         // 7. Save Order and optionally UserCoupon
         Order savedOrder = orderRepository.save(order);
@@ -331,6 +384,9 @@ public class OrderService {
                         .quantity(item.getQuantity())
                         .price(item.getPrice())
                         .subtotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                        .variantId(item.getProductVariant() != null ? item.getProductVariant().getId() : null)
+                        .variantName(item.getVariantName())
+                        .variant(item.getProductVariant() != null ? convertToVariantDto(item.getProductVariant()) : null)
                         .build())
                 .collect(Collectors.toList());
 
@@ -384,5 +440,41 @@ public class OrderService {
                 .transactionId(order.getTransactionId())
                 .paymentScreenshotUrl(order.getPaymentScreenshotUrl())
                 .build();
+    }
+
+    private ProductVariantResponseDto convertToVariantDto(ProductVariant v) {
+        return ProductVariantResponseDto.builder()
+                .id(v.getId())
+                .productId(v.getProduct().getId())
+                .variantName(v.getVariantName())
+                .weight(v.getWeight())
+                .weightUnit(v.getWeightUnit())
+                .volume(v.getVolume())
+                .volumeUnit(v.getVolumeUnit())
+                .sizeLabel(v.getSizeLabel())
+                .price(v.getPrice())
+                .discountedPrice(v.getDiscountedPrice())
+                .stock(v.getStock())
+                .sku(v.getSku())
+                .barcode(v.getBarcode())
+                .status(v.getStatus())
+                .createdAt(v.getCreatedAt())
+                .updatedAt(v.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * Simple tuple to unify cart items from either the database cart or the request body.
+     */
+    private static class CartItemTuple {
+        final Product product;
+        final ProductVariant variant;
+        final int quantity;
+
+        CartItemTuple(Product product, ProductVariant variant, int quantity) {
+            this.product = product;
+            this.variant = variant;
+            this.quantity = quantity;
+        }
     }
 }

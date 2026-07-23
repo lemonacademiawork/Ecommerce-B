@@ -29,6 +29,10 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id", nullable = true)
+    private ProductVariant productVariant;
+
     @Min(value = 1, message = "Quantity must be greater than zero")
     @Column(nullable = false)
     private Integer quantity;

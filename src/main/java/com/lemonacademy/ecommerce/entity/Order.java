@@ -126,6 +126,9 @@ public class Order {
     @Column(name = "payment_screenshot_url")
     private String paymentScreenshotUrl;
 
+    @Column(name = "razorpay_order_id")
+    private String razorpayOrderId;
+
     @Column(name = "payment_verified_at")
     private LocalDateTime paymentVerifiedAt;
 

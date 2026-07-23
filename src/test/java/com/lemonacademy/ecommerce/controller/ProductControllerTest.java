@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -64,6 +65,7 @@ class ProductControllerTest {
 
     private ProductResponseDto productResponseDto;
     private List<ProductResponseDto> listResponse;
+    private PageResponseDto<ProductResponseDto> pageResponse;
     private User adminUser;
 
     @BeforeEach
@@ -80,41 +82,49 @@ class ProductControllerTest {
                 .build();
 
         listResponse = Collections.singletonList(productResponseDto);
+        pageResponse = PageResponseDto.<ProductResponseDto>builder()
+                .content(listResponse)
+                .pageNumber(0)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
 
         adminUser = User.builder().id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")).email("admin@test.com").role(Role.ADMIN).build();
     }
 
     @Test
     void getProducts_Default_Success() throws Exception {
-        when(productService.getActiveProducts()).thenReturn(listResponse);
+        when(productService.getActiveProducts(any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test
     void getProducts_WithSearch_Success() throws Exception {
-        when(productService.searchProducts(anyString(), anyBoolean())).thenReturn(listResponse);
+        when(productService.searchProducts(anyString(), anyBoolean(), any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products?search=Laptop"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test
     void getProducts_ByCategory_Success() throws Exception {
-        when(productService.getActiveProductsByCategory(any(UUID.class))).thenReturn(listResponse);
+        when(productService.getActiveProductsByCategory(any(UUID.class), any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products?categoryId=1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test
     void getProducts_AllFlag_Success() throws Exception {
-        when(productService.getAllProducts()).thenReturn(listResponse);
+        when(productService.getAllProducts(any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products?all=true"))
                 .andExpect(status().isOk());
@@ -122,21 +132,21 @@ class ProductControllerTest {
 
     @Test
     void searchProducts_Success() throws Exception {
-        when(productService.searchProducts(anyString(), anyBoolean())).thenReturn(listResponse);
+        when(productService.searchProducts(anyString(), anyBoolean(), any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products/search?keyword=Laptop"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test
     void filterProducts_ByPriceRange_Success() throws Exception {
-        when(productService.getProductsByPriceRange(any(BigDecimal.class), any(BigDecimal.class)))
-                .thenReturn(listResponse);
+        when(productService.getProductsByPriceRange(any(BigDecimal.class), any(BigDecimal.class), any(Pageable.class)))
+                .thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products/filter?minPrice=1000&maxPrice=2000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test
@@ -160,11 +170,11 @@ class ProductControllerTest {
 
     @Test
     void getProductsByCategory_Success() throws Exception {
-        when(productService.getActiveProductsByCategory(any(UUID.class))).thenReturn(listResponse);
+        when(productService.getActiveProductsByCategory(any(UUID.class), any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/products/category/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Laptop"));
+                .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
 
     @Test

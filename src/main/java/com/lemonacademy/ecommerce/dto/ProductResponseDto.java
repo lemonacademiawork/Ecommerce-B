@@ -24,6 +24,7 @@ public class ProductResponseDto {
     private String imageUrl;
     private java.util.List<String> imageUrls;
     private Boolean active;
+    private Boolean hasVariants;
     private UUID categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
@@ -33,4 +34,6 @@ public class ProductResponseDto {
     private Integer length;
     private Integer breadth;
     private Integer height;
+
+    private java.util.List<ProductVariantResponseDto> variants;
 }

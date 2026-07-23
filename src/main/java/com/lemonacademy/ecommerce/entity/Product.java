@@ -29,17 +29,24 @@ public class Product {
     @Column(length = 5000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private BigDecimal price;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer stock;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductVariant> variants = new ArrayList<>();
+
+    @Builder.Default
+    private Boolean hasVariants = false;
 
     @Transient
     public String getImageUrl() {

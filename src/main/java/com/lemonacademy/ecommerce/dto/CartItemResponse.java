@@ -23,4 +23,8 @@ public class CartItemResponse {
     private BigDecimal price;
     private Integer quantity;
     private BigDecimal subtotal;
+
+    private UUID variantId;
+    private String variantName;
+    private ProductVariantResponseDto variant;
 }

@@ -28,8 +28,8 @@ public class CookieUtils {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)
-                .secure(request.isSecure())
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .maxAge(maxAge)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -43,8 +43,8 @@ public class CookieUtils {
                     ResponseCookie deleteCookie = ResponseCookie.from(name, "")
                             .path("/")
                             .httpOnly(true)
-                            .secure(request.isSecure())
-                            .sameSite("Lax")
+                            .secure(true)
+                            .sameSite("None")
                             .maxAge(0)
                             .build();
                     response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());

@@ -23,8 +23,9 @@ public class QrPaymentService implements PaymentStrategy {
     @Transactional
     public Order processPayment(Order order, String transactionId, MultipartFile paymentScreenshot) {
         
-        if ((transactionId == null || transactionId.trim().isEmpty()) && (paymentScreenshot == null || paymentScreenshot.isEmpty())) {
-            throw new IllegalArgumentException("At least one of transaction ID or payment screenshot must be provided.");
+        if (paymentScreenshot == null || paymentScreenshot.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Payment screenshot is required. Please upload a screenshot where the transaction ID is clearly visible.");
         }
 
         if (order.getPaymentStatus() == PaymentStatus.PAID) {

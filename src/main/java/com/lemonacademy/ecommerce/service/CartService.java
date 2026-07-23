@@ -14,6 +14,8 @@ import com.lemonacademy.ecommerce.exception.UnauthorizedAccessException;
 import com.lemonacademy.ecommerce.repository.CartItemRepository;
 import com.lemonacademy.ecommerce.repository.CartRepository;
 import com.lemonacademy.ecommerce.repository.ProductRepository;
+import com.lemonacademy.ecommerce.repository.ProductVariantRepository;
+import com.lemonacademy.ecommerce.entity.ProductVariant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +35,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
 
     @Transactional
     public CartResponse addToCart(AddToCartRequest request) {
@@ -47,6 +50,16 @@ public class CartService {
             throw new InvalidOperationException("Cannot add inactive product to cart");
         }
 
+        if (Boolean.TRUE.equals(product.getHasVariants())) {
+            if (request.getVariantId() == null) {
+                throw new InvalidOperationException("Please select a variant for this product");
+            }
+        } else {
+            if (request.getVariantId() != null) {
+                throw new InvalidOperationException("This product does not have variants");
+            }
+        }
+
         // Get or create cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
@@ -57,8 +70,24 @@ public class CartService {
                     return cartRepository.save(newCart);
                 });
 
+        ProductVariant variant = null;
+        if (request.getVariantId() != null) {
+            variant = productVariantRepository.findById(request.getVariantId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Variant not found with id: " + request.getVariantId()));
+            if (!variant.getProduct().getId().equals(product.getId())) {
+                throw new InvalidOperationException("Variant does not belong to the given product");
+            }
+            if (!Boolean.TRUE.equals(variant.getStatus())) {
+                throw new InvalidOperationException("Cannot add inactive variant to cart");
+            }
+        }
+
         // Check if product already exists in cart
-        Optional<CartItem> existingItem = cartItemRepository.findByCartAndProduct(cart, product);
+        Optional<CartItem> existingItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()) && 
+                        (item.getProductVariant() == null && request.getVariantId() == null || 
+                         item.getProductVariant() != null && item.getProductVariant().getId().equals(request.getVariantId())))
+                .findFirst();
 
         if (existingItem.isPresent()) {
             // Increase quantity
@@ -66,9 +95,10 @@ public class CartService {
             int newQuantity = cartItem.getQuantity() + request.getQuantity();
 
             // Validate stock availability (total quantity in cart)
-            if (newQuantity > product.getStock()) {
+            int availableStock = variant != null ? variant.getStock() : product.getStock();
+            if (newQuantity > availableStock) {
                 throw new InsufficientStockException(
-                        "Insufficient stock. Available: " + product.getStock()
+                        "Insufficient stock. Available: " + availableStock
                                 + ", Already in cart: " + cartItem.getQuantity()
                                 + ", Requested: " + request.getQuantity());
             }
@@ -77,9 +107,10 @@ public class CartService {
             cartItemRepository.save(cartItem);
         } else {
             // Validate stock availability
-            if (request.getQuantity() > product.getStock()) {
+            int availableStock = variant != null ? variant.getStock() : product.getStock();
+            if (request.getQuantity() > availableStock) {
                 throw new InsufficientStockException(
-                        "Insufficient stock. Available: " + product.getStock()
+                        "Insufficient stock. Available: " + availableStock
                                 + ", Requested: " + request.getQuantity());
             }
 
@@ -87,6 +118,7 @@ public class CartService {
             CartItem cartItem = CartItem.builder()
                     .cart(cart)
                     .product(product)
+                    .productVariant(variant)
                     .quantity(request.getQuantity())
                     .build();
             cartItemRepository.save(cartItem);
@@ -132,9 +164,11 @@ public class CartService {
 
         // Validate stock availability
         Product product = cartItem.getProduct();
-        if (request.getQuantity() > product.getStock()) {
+        ProductVariant variant = cartItem.getProductVariant();
+        int availableStock = variant != null ? variant.getStock() : product.getStock();
+        if (request.getQuantity() > availableStock) {
             throw new InsufficientStockException(
-                    "Insufficient stock. Available: " + product.getStock()
+                    "Insufficient stock. Available: " + availableStock
                             + ", Requested: " + request.getQuantity());
         }
 
@@ -206,16 +240,43 @@ public class CartService {
 
     private CartItemResponse convertToCartItemResponse(CartItem cartItem) {
         Product product = cartItem.getProduct();
-        BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        ProductVariant variant = cartItem.getProductVariant();
+        
+        BigDecimal price = variant != null ? variant.getPrice() : product.getPrice();
+        BigDecimal subtotal = price.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 
         return CartItemResponse.builder()
                 .cartItemId(cartItem.getId())
                 .productId(product.getId())
                 .productName(product.getName())
                 .imageUrl(product.getImageUrl())
-                .price(product.getPrice())
+                .price(price)
                 .quantity(cartItem.getQuantity())
                 .subtotal(subtotal)
+                .variantId(variant != null ? variant.getId() : null)
+                .variantName(variant != null ? variant.getVariantName() : null)
+                .variant(variant != null ? convertToVariantDto(variant) : null)
+                .build();
+    }
+    
+    private ProductVariantResponseDto convertToVariantDto(ProductVariant v) {
+        return ProductVariantResponseDto.builder()
+                .id(v.getId())
+                .productId(v.getProduct().getId())
+                .variantName(v.getVariantName())
+                .weight(v.getWeight())
+                .weightUnit(v.getWeightUnit())
+                .volume(v.getVolume())
+                .volumeUnit(v.getVolumeUnit())
+                .sizeLabel(v.getSizeLabel())
+                .price(v.getPrice())
+                .discountedPrice(v.getDiscountedPrice())
+                .stock(v.getStock())
+                .sku(v.getSku())
+                .barcode(v.getBarcode())
+                .status(v.getStatus())
+                .createdAt(v.getCreatedAt())
+                .updatedAt(v.getUpdatedAt())
                 .build();
     }
 }

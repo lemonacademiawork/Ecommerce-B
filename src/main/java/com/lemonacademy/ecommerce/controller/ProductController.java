@@ -1,19 +1,22 @@
 package com.lemonacademy.ecommerce.controller;
 
 import java.util.UUID;
+import java.util.List;
 
 import com.lemonacademy.ecommerce.dto.ApiResponse;
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductResponseDto;
 import com.lemonacademy.ecommerce.dto.ProductRequestDto;
 import com.lemonacademy.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,41 +26,63 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProducts(
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductResponseDto>>> getProducts(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "categoryId", required = false) UUID categoryId,
-            @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
+            @RequestParam(value = "all", required = false, defaultValue = "false") boolean all,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
         
-        List<ProductResponseDto> products;
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        PageResponseDto<ProductResponseDto> products;
         boolean activeOnly = !all;
 
         if (search != null && !search.trim().isEmpty()) {
-            products = productService.searchProducts(search, activeOnly);
+            products = productService.searchProducts(search, activeOnly, pageable);
         } else if (categoryId != null) {
             products = activeOnly 
-                    ? productService.getActiveProductsByCategory(categoryId) 
-                    : productService.getProductsByCategory(categoryId);
+                    ? productService.getActiveProductsByCategory(categoryId, pageable) 
+                    : productService.getProductsByCategory(categoryId, pageable);
         } else {
             products = activeOnly 
-                    ? productService.getActiveProducts() 
-                    : productService.getAllProducts();
+                    ? productService.getActiveProducts(pageable) 
+                    : productService.getAllProducts(pageable);
         }
 
         return ResponseEntity.ok(ApiResponse.success("Products retrieved successfully", products));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> searchProducts(
-            @RequestParam("keyword") String keyword) {
-        List<ProductResponseDto> products = productService.searchProducts(keyword, true);
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductResponseDto>>> searchProducts(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+            
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PageResponseDto<ProductResponseDto> products = productService.searchProducts(keyword, true, pageable);
         return ResponseEntity.ok(ApiResponse.success("Search results retrieved successfully", products));
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> filterProducts(
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductResponseDto>>> filterProducts(
             @RequestParam("minPrice") java.math.BigDecimal minPrice,
-            @RequestParam("maxPrice") java.math.BigDecimal maxPrice) {
-        List<ProductResponseDto> products = productService.getProductsByPriceRange(minPrice, maxPrice);
+            @RequestParam("maxPrice") java.math.BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "price") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+            
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PageResponseDto<ProductResponseDto> products = productService.getProductsByPriceRange(minPrice, maxPrice, pageable);
         return ResponseEntity.ok(ApiResponse.success("Filtered products retrieved successfully", products));
     }
 
@@ -68,12 +93,20 @@ public class ProductController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProductsByCategory(
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductResponseDto>>> getProductsByCategory(
             @PathVariable UUID categoryId,
-            @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
-        List<ProductResponseDto> products = all 
-                ? productService.getProductsByCategory(categoryId) 
-                : productService.getActiveProductsByCategory(categoryId);
+            @RequestParam(value = "all", required = false, defaultValue = "false") boolean all,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+            
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        PageResponseDto<ProductResponseDto> products = all 
+                ? productService.getProductsByCategory(categoryId, pageable) 
+                : productService.getActiveProductsByCategory(categoryId, pageable);
         return ResponseEntity.ok(ApiResponse.success("Products retrieved by category successfully", products));
     }
 
