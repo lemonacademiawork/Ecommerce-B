@@ -20,6 +20,8 @@ import com.lemonacademy.ecommerce.exception.ResourceNotFoundException;
 import com.lemonacademy.ecommerce.exception.UnauthorizedAccessException;
 import com.lemonacademy.ecommerce.repository.UserRepository;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -30,16 +32,20 @@ public class PaymentController {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
+    @Value("${upi.id:7905713069m@pnb}")
+    private String upiId;
+
     @GetMapping("/qr")
     public ResponseEntity<ApiResponse<QrDetailsResponse>> getQrDetails() {
         String absoluteImageUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .path("/images/qr.jpeg")
+                .queryParam("v", System.currentTimeMillis())
                 .toUriString();
 
         QrDetailsResponse response = QrDetailsResponse.builder()
                 .merchantName("Lemon House")
-                .upiId("")
+                .upiId(upiId)
                 .qrImageUrl(absoluteImageUrl)
                 .build();
         return ResponseEntity.ok(ApiResponse.success("QR Details retrieved successfully", response));
