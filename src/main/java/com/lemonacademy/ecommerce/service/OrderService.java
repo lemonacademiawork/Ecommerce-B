@@ -379,13 +379,13 @@ public class OrderService {
                 .map(item -> OrderItemResponse.builder()
                         .id(item.getId())
                         .productId(item.getProduct().getId())
-                        .productName(item.getProduct().getName())
+                        .productName(sanitizeForExternalApi(item.getProduct().getName()))
                         .imageUrl(item.getProduct().getImageUrl())
                         .quantity(item.getQuantity())
                         .price(item.getPrice())
                         .subtotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                         .variantId(item.getProductVariant() != null ? item.getProductVariant().getId() : null)
-                        .variantName(item.getVariantName())
+                        .variantName(sanitizeForExternalApi(item.getVariantName()))
                         .variant(item.getProductVariant() != null ? convertToVariantDto(item.getProductVariant()) : null)
                         .build())
                 .collect(Collectors.toList());
@@ -461,6 +461,18 @@ public class OrderService {
                 .createdAt(v.getCreatedAt())
                 .updatedAt(v.getUpdatedAt())
                 .build();
+    }
+
+    private String sanitizeForExternalApi(String input) {
+        if (input == null) return null;
+        return input
+                .replace("\u2013", "-") // en-dash
+                .replace("\u2014", "-") // em-dash
+                .replace("\u2018", "'") // left single quote
+                .replace("\u2019", "'") // right single quote
+                .replace("\u201c", "\"") // left double quote
+                .replace("\u201d", "\"") // right double quote
+                .replaceAll("[^\\x00-\\x7F]", ""); // strip any remaining non-ASCII characters
     }
 
     /**
