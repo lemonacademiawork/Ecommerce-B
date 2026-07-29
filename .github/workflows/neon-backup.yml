@@ -1,0 +1,45 @@
+name: Neon Daily Backup
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Runs every day at 2:30 AM IST (9:00 PM UTC previous day)
+    - cron: "0 21 * * *"
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create Neon backup
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          BACKUP_FILE="neon-production-$(date -u +'%Y-%m-%d_%H-%M-%S').dump"
+          pg_dump \
+            --dbname="$DATABASE_URL" \
+            --format=custom \
+            --no-owner \
+            --no-acl \
+            --file="$BACKUP_FILE"
+
+          echo "BACKUP_FILE=$BACKUP_FILE" >> "$GITHUB_ENV"
+
+      - name: Verify backup
+        run: |
+          pg_restore --list "$BACKUP_FILE" > /dev/null
+          echo "Backup verified successfully."
+
+      - name: Upload backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-production-backup-${{ github.run_number }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+          if-no-files-found: error
