@@ -1,6 +1,7 @@
 package com.lemonacademy.ecommerce.service;
 
 import com.lemonacademy.ecommerce.dto.ChangePasswordRequest;
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.UpdateProfileRequest;
 import com.lemonacademy.ecommerce.dto.UserProfileResponse;
 import com.lemonacademy.ecommerce.dto.UserResponse;
@@ -8,6 +9,8 @@ import com.lemonacademy.ecommerce.entity.User;
 import com.lemonacademy.ecommerce.exception.InvalidOperationException;
 import com.lemonacademy.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,6 +72,12 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(this::convertToUserResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<UserResponse> getAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        return PageResponseDto.of(userPage, this::convertToUserResponse);
     }
 
     private UserProfileResponse convertToResponse(User user) {

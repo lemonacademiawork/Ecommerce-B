@@ -2,6 +2,7 @@ package com.lemonacademy.ecommerce.controller;
 
 import com.lemonacademy.ecommerce.dto.AdminPaymentResponse;
 import com.lemonacademy.ecommerce.dto.ApiResponse;
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.entity.Order;
 import com.lemonacademy.ecommerce.entity.OrderStatus;
 import com.lemonacademy.ecommerce.entity.PaymentStatus;
@@ -10,6 +11,10 @@ import com.lemonacademy.ecommerce.exception.ResourceNotFoundException;
 import com.lemonacademy.ecommerce.repository.OrderRepository;
 import com.lemonacademy.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -31,12 +34,16 @@ public class AdminPaymentController {
     private final UserRepository userRepository;
 
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<List<AdminPaymentResponse>>> getPendingPayments() {
-        List<Order> pendingOrders = orderRepository.findAll().stream()
-                .filter(o -> o.getPaymentStatus() == PaymentStatus.PENDING_VERIFICATION)
-                .collect(Collectors.toList());
-
-        List<AdminPaymentResponse> response = pendingOrders.stream().map(this::mapToAdminPaymentResponse).collect(Collectors.toList());
+    public ResponseEntity<ApiResponse<PageResponseDto<AdminPaymentResponse>>> getPendingPayments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Order> pendingPage = orderRepository.findAllByPaymentStatus(PaymentStatus.PENDING_VERIFICATION, pageable);
+        PageResponseDto<AdminPaymentResponse> response = PageResponseDto.of(pendingPage, this::mapToAdminPaymentResponse);
         return ResponseEntity.ok(ApiResponse.success("Pending payments retrieved successfully", response));
     }
 

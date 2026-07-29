@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.lemonacademy.ecommerce.security.AdminUserDetails;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -52,28 +53,8 @@ public class OrderService {
      * transactions so that a shipping API failure does not roll back the order.
      */
     public OrderResponse createOrder(OrderRequest request) {
-        // Step 1: Save order in its own transaction
+        // Save order in transaction (default shipment status is PENDING_BOOKING)
         Order savedOrder = saveOrderInTransaction(request);
-
-        // Step 2: Attempt iCarry booking outside the order transaction
-        try {
-            Order booked = icarryShipmentService.bookShipmentForOrder(savedOrder);
-            if (booked != null) {
-                savedOrder = booked;
-            }
-        } catch (Exception e) {
-            log.warn("iCarry booking failed for order {}: {}. Order is saved with PENDING status.",
-                     savedOrder.getId(), e.getMessage());
-            // Order is already persisted — just mark shipment as pending
-            try {
-                savedOrder.setShipmentStatus("PENDING_BOOKING");
-                savedOrder = orderRepository.save(savedOrder);
-            } catch (Exception inner) {
-                // Log but don't fail — the order itself is safe
-                log.error("Failed to update shipment status for order {}: {}", savedOrder.getId(), inner.getMessage());
-            }
-        }
-
         return convertToOrderResponse(savedOrder);
     }
 
@@ -144,6 +125,7 @@ public class OrderService {
         order.setAddress(address);
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setShipmentStatus("PENDING_BOOKING");
 
         for (CartItemTuple tuple : itemsToProcess) {
             Product product = tuple.product;
@@ -156,7 +138,8 @@ public class OrderService {
             ProductVariant variant = tuple.variant;
 
             // Validate stock
-            int availableStock = variant != null ? variant.getStock() : product.getStock();
+            Integer stockVal = variant != null ? variant.getStock() : product.getStock();
+            int availableStock = stockVal != null ? stockVal : 0;
             if (tuple.quantity > availableStock) {
                 throw new InsufficientStockException(
                         "Insufficient stock for product " + product.getName() + 
@@ -305,7 +288,21 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResponse getOrderDetails(String id) {
-        User user = getAuthenticatedUser();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+
+        boolean isAdmin = false;
+        User customer = null;
+
+        if (principal instanceof AdminUserDetails) {
+            isAdmin = true;
+        } else if (principal instanceof User) {
+            customer = (User) principal;
+            isAdmin = customer.getRole() == Role.ADMIN;
+        } else {
+            throw new UnauthorizedAccessException("Not authenticated");
+        }
+
         Order order = null;
         try {
             UUID uuid = UUID.fromString(id);
@@ -320,9 +317,10 @@ public class OrderService {
         }
 
         // Validate Ownership: Admin can access any order, Customer can only access their own
-        boolean isAdmin = user.getRole() == Role.ADMIN;
-        if (!isAdmin && !order.getUser().getId().equals(user.getId())) {
-            throw new UnauthorizedAccessException("You are not authorized to view this order");
+        if (!isAdmin) {
+            if (customer == null || !order.getUser().getId().equals(customer.getId())) {
+                throw new UnauthorizedAccessException("You are not authorized to view this order");
+            }
         }
 
         OrderResponse response = convertToOrderResponse(order);
@@ -352,6 +350,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public PageResponseDto<OrderResponse> getAllOrders(Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return PageResponseDto.of(orderPage, this::convertToOrderResponse);
+    }
+
     @Transactional
     public OrderResponse updateOrderStatus(String id, OrderStatus status) {
         Order order = null;
@@ -367,7 +371,15 @@ public class OrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         }
 
-        order.setStatus(status);
+        if (status == OrderStatus.PAID) {
+            order.setPaymentStatus(com.lemonacademy.ecommerce.entity.PaymentStatus.PAID);
+            order.setStatus(OrderStatus.CONFIRMED);
+            if (order.getPaymentVerifiedAt() == null) {
+                order.setPaymentVerifiedAt(java.time.LocalDateTime.now());
+            }
+        } else {
+            order.setStatus(status);
+        }
         Order updated = orderRepository.save(order);
         return convertToOrderResponse(updated);
     }
