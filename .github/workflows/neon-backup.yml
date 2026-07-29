@@ -19,7 +19,7 @@ jobs:
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get update
           sudo apt-get install -y postgresql-client-18
-          pg_dump --version
+          /usr/lib/postgresql/18/bin/pg_dump --version
 
       - name: Create Neon backup
         env:
@@ -27,7 +27,7 @@ jobs:
         run: |
           BACKUP_FILE="neon-production-$(date -u +'%Y-%m-%d_%H-%M-%S').dump"
 
-          pg_dump \
+          /usr/lib/postgresql/18/bin/pg_dump \
             --dbname="$DATABASE_URL" \
             --format=custom \
             --no-owner \
@@ -38,7 +38,7 @@ jobs:
 
       - name: Verify backup
         run: |
-          pg_restore --list "$BACKUP_FILE" > /dev/null
+          /usr/lib/postgresql/18/bin/pg_restore --list "$BACKUP_FILE" > /dev/null
           echo "Backup verified successfully."
 
       - name: Upload backup
