@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Runs every day at 2:30 AM IST (9:00 PM UTC previous day)
+    # 2:30 AM IST = 9:00 PM UTC previous day
     - cron: "0 21 * * *"
 
 jobs:
@@ -12,16 +12,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install PostgreSQL client
+      - name: Install PostgreSQL 18 client
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          pg_dump --version
 
       - name: Create Neon backup
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: |
           BACKUP_FILE="neon-production-$(date -u +'%Y-%m-%d_%H-%M-%S').dump"
+
           pg_dump \
             --dbname="$DATABASE_URL" \
             --format=custom \
