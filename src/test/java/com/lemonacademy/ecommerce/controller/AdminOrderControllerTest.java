@@ -84,12 +84,20 @@ class AdminOrderControllerTest {
 
     @Test
     void getAllOrders_AsAdmin_Success() throws Exception {
-        when(orderService.getAllOrders()).thenReturn(listResponse);
+        PageResponseDto<OrderResponse> pageResponse = PageResponseDto.<OrderResponse>builder()
+                .content(listResponse)
+                .pageNumber(0)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
+        when(orderService.getAllOrders(any(), any(), any(), any())).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/admin/orders").with(user(adminUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].id").value(1));
+                .andExpect(jsonPath("$.data.content[0].id").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
@@ -110,7 +118,7 @@ class AdminOrderControllerTest {
 
         mockMvc.perform(get("/api/admin/orders/23db3d7a-683b-372b-8036-95da3ae5c542").with(user(adminUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(jsonPath("$.data.status").value("PENDING"));
     }
 

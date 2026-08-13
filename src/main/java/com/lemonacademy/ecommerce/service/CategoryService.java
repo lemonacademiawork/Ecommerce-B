@@ -1,6 +1,8 @@
 package com.lemonacademy.ecommerce.service;
 
 import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.lemonacademy.ecommerce.dto.CategoryDto;
 import com.lemonacademy.ecommerce.entity.Category;
@@ -9,9 +11,6 @@ import com.lemonacademy.ecommerce.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +28,16 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public List<CategoryDto> getActiveCategories() {
         return categoryRepository.findAllByActiveTrue().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryDto> searchCategories(String query, boolean all) {
+        List<Category> categories = all 
+                ? categoryRepository.searchCategories(query)
+                : categoryRepository.searchActiveCategories(query);
+        return categories.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }

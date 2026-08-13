@@ -101,7 +101,7 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/categories/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(jsonPath("$.data.name").value("Electronics"));
     }
 
@@ -110,7 +110,7 @@ class CategoryControllerTest {
         when(categoryService.getCategoryById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
                 .thenThrow(new ResourceNotFoundException("Category not found with id: 99"));
 
-        mockMvc.perform(get("/api/categories/99"))
+        mockMvc.perform(get("/api/categories/d2636d80-51bd-3a57-9ac2-4b559df83916"))
                 .andExpect(status().isNotFound());
     }
 

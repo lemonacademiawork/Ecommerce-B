@@ -30,9 +30,12 @@ public class UpstashRedisService {
             @Value("${UPSTASH_REDIS_REST_TOKEN:}") String token,
             ObjectMapper objectMapper
     ) {
-        this.url = url;
-        this.token = token;
-        this.restTemplate = new RestTemplate();
+        this.url = url != null ? url.replaceAll("^\"|\"$", "") : null;
+        this.token = token != null ? token.replaceAll("^\"|\"$", "") : null;
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(500); // 500ms
+        factory.setReadTimeout(500);    // 500ms
+        this.restTemplate = new RestTemplate(factory);
         this.objectMapper = objectMapper;
 
         if (url == null || url.isEmpty() || token == null || token.isEmpty()) {
@@ -130,5 +133,21 @@ public class UpstashRedisService {
     public void expire(String key, long timeoutInSeconds) {
         execute(Arrays.asList("EXPIRE", key, String.valueOf(timeoutInSeconds)));
         log.info("OTP expiry set: key '{}' set TTL to {}s", key, timeoutInSeconds);
+    }
+
+    public void deletePattern(String pattern) {
+        if (url == null || url.isEmpty() || token == null || token.isEmpty()) {
+            return;
+        }
+        try {
+            JsonNode result = execute(Arrays.asList("KEYS", pattern));
+            if (result != null && result.isArray()) {
+                for (JsonNode node : result) {
+                    delete(node.asText());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to delete keys with pattern {}: {}", pattern, e.getMessage());
+        }
     }
 }

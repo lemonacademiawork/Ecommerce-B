@@ -165,7 +165,7 @@ class AddressControllerTest {
     void setDefaultAddress_Authenticated_Success() throws Exception {
         when(addressService.setDefaultAddress(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(addressResponse);
 
-        mockMvc.perform(put("/api/addresses/1/default")
+        mockMvc.perform(put("/api/addresses/23db3d7a-683b-372b-8036-95da3ae5c542/default")
                         .with(user(customerUser))
                         .with(csrf()))
                 .andExpect(status().isOk())

@@ -101,29 +101,28 @@ class CartServiceTest {
         AddToCartRequest request = new AddToCartRequest();
         request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(2);
-
+ 
         when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
-        when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.empty());
-
+ 
         CartResponse response = cartService.addToCart(request);
-
+ 
         assertThat(response).isNotNull();
         verify(cartItemRepository, times(1)).save(any(CartItem.class));
     }
-
+ 
     @Test
     void addToCart_ExistingItem_Success() {
         AddToCartRequest request = new AddToCartRequest();
         request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(3);
-
+ 
+        cart.getItems().add(cartItem);
         when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
-        when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.of(cartItem));
-
+ 
         CartResponse response = cartService.addToCart(request);
-
+ 
         assertThat(response).isNotNull();
         assertThat(cartItem.getQuantity()).isEqualTo(5); // 2 + 3
         verify(cartItemRepository, times(1)).save(cartItem);
@@ -155,11 +154,10 @@ class CartServiceTest {
         AddToCartRequest request = new AddToCartRequest();
         request.setProductId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
         request.setQuantity(15); // > 10
-
+ 
         when(productRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(product));
         when(cartRepository.findByUser(any(User.class))).thenReturn(Optional.of(cart));
-        when(cartItemRepository.findByCartAndProduct(any(Cart.class), any(Product.class))).thenReturn(Optional.empty());
-
+ 
         assertThrows(InsufficientStockException.class, () -> cartService.addToCart(request));
     }
 

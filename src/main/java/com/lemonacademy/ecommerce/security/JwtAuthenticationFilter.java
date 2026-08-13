@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,8 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -52,11 +56,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             userEmail = jwtService.extractUsername(jwt);
             String role = jwtService.extractRole(jwt);
+            log.info("JWT auth filter: email={}, role={}, uri={}", userEmail, role, request.getRequestURI());
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails;
+                UserDetails userDetails = null;
                 if ("ADMIN".equals(role)) {
-                    userDetails = this.adminUserDetailsService.loadUserByUsername(userEmail);
+                    try {
+                        userDetails = this.adminUserDetailsService.loadUserByUsername(userEmail);
+                        log.info("Admin loaded from admins table: {}", userEmail);
+                    } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+                        log.info("Admin not found in admins table, falling back to users table: {}", userEmail);
+                        userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                    }
                 } else {
                     userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 }
@@ -69,12 +80,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.info("Authentication set for user: {}, authorities: {}", userEmail, userDetails.getAuthorities());
+                } else {
+                    log.warn("JWT token invalid for user: {}", userEmail);
                 }
             }
         } catch (Exception e) {
-            // In a production app, we could optionally handle exception logging/clearing context
+            log.error("JWT authentication failed for URI {}: {} - {}", request.getRequestURI(), e.getClass().getSimpleName(), e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
 }
+

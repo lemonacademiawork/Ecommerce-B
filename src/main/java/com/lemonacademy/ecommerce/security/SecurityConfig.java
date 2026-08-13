@@ -65,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/admin/auth/**",
                         "/api/products/**", "/api/categories/**",
                         "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-                        "/oauth2/**", "/login/oauth2/**", "/api/webhooks/icarry/**", "/images/**").permitAll()
+                        "/oauth2/**", "/login/oauth2/**", "/api/webhooks/icarry/**", "/images/**", "/api/health/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**", "/api/user/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
@@ -105,12 +105,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allowed origins — explicit list required when credentials are enabled (no "*")
         configuration.setAllowedOrigins(List.of(
                 "https://lemonhousecraft.in",
                 "https://www.lemonhousecraft.in",
-                "http://localhost:4200",
-                "http://localhost:3000"
+                "https://admin.lemonhousecraft.in",
+                "https://www.admin.lemonhousecraft.in",
+                "https://ecommercef-ten.vercel.app",
+                "https://ecommerce-frontend-861245237403.asia-south1.run.app",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:4200"
         ));
 
         // Allowed HTTP methods

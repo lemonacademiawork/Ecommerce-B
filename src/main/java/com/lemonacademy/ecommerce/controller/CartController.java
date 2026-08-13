@@ -38,7 +38,7 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success("Cart item updated successfully", cart));
     }
 
-    @DeleteMapping("/remove/{cartItemId}")
+    @DeleteMapping({"/remove/{cartItemId}", "/{cartItemId}"})
     public ResponseEntity<ApiResponse<CartResponse>> removeCartItem(@PathVariable UUID cartItemId) {
         CartResponse cart = cartService.removeCartItem(cartItemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed from cart", cart));

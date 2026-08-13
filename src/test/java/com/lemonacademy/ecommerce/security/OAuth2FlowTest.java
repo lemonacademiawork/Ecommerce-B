@@ -43,6 +43,9 @@ class OAuth2FlowTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
+
     @InjectMocks
     private OAuth2AuthenticationSuccessHandler successHandler;
 

@@ -2,6 +2,7 @@ package com.lemonacademy.ecommerce.controller;
 
 import java.util.UUID;
 
+import com.lemonacademy.ecommerce.dto.PageResponseDto;
 import com.lemonacademy.ecommerce.dto.UserResponse;
 import com.lemonacademy.ecommerce.entity.Role;
 import com.lemonacademy.ecommerce.entity.User;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,16 +74,24 @@ class AdminUserControllerTest {
 
     @Test
     void getAllUsers_AsAdmin_Success() throws Exception {
-        when(userService.getAllUsers()).thenReturn(mockUsers);
+        PageResponseDto<UserResponse> pageResponse = PageResponseDto.<UserResponse>builder()
+                .content(mockUsers)
+                .pageNumber(0)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
+        when(userService.getAllUsers(any(), any())).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/admin/users").with(user(adminUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].id").value(2))
-                .andExpect(jsonPath("$.data[0].name").value("Customer User"))
-                .andExpect(jsonPath("$.data[0].email").value("customer@test.com"))
-                .andExpect(jsonPath("$.data[0].role").value("CUSTOMER"))
-                .andExpect(jsonPath("$.data[0].active").value(true));
+                .andExpect(jsonPath("$.data.content[0].id").value("df4382cf-73c7-35ab-965a-b690f63e0acf"))
+                .andExpect(jsonPath("$.data.content[0].name").value("Customer User"))
+                .andExpect(jsonPath("$.data.content[0].email").value("customer@test.com"))
+                .andExpect(jsonPath("$.data.content[0].role").value("CUSTOMER"))
+                .andExpect(jsonPath("$.data.content[0].active").value(true));
     }
 
     @Test

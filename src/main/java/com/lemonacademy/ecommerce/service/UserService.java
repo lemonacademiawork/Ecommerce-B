@@ -76,7 +76,14 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public PageResponseDto<UserResponse> getAllUsers(Pageable pageable) {
-        Page<User> userPage = userRepository.findAll(pageable);
+        return getAllUsers(null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<UserResponse> getAllUsers(String search, Pageable pageable) {
+        Page<User> userPage = (search != null && !search.trim().isEmpty())
+                ? userRepository.searchUsers(search, pageable)
+                : userRepository.findAll(pageable);
         return PageResponseDto.of(userPage, this::convertToUserResponse);
     }
 

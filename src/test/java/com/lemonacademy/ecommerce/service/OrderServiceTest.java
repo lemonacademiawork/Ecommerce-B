@@ -112,6 +112,7 @@ class OrderServiceTest {
 
         order = new Order();
         order.setId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        order.setOrderNumber("LH-20260711-A3F8");
         order.setUser(user);
         order.setAddress(address);
         order.setStatus(OrderStatus.PENDING);
@@ -146,7 +147,7 @@ class OrderServiceTest {
         OrderResponse response = orderService.createOrder(request);
 
         assertThat(response).isNotNull();
-        assertThat(response.getTotalAmount()).isEqualTo(new BigDecimal("2000.00"));
+        assertThat(response.getTotalAmount()).isEqualTo(new BigDecimal("2050.00"));
         assertThat(cart.getItems()).isEmpty();
         verify(productRepository, times(1)).save(product);
         verify(orderRepository, times(1)).save(any(Order.class));

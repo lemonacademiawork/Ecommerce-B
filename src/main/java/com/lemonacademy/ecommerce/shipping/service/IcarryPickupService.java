@@ -9,6 +9,7 @@ import com.lemonacademy.ecommerce.repository.OrderRepository;
 import com.lemonacademy.ecommerce.shipping.client.IcarryClient;
 import com.lemonacademy.ecommerce.shipping.dto.PickupAddressRequest;
 import com.lemonacademy.ecommerce.shipping.exception.IcarryApiException;
+import com.lemonacademy.ecommerce.service.UpstashRedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,15 @@ public class IcarryPickupService {
     private final IcarryClient client;
     private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper;
+    private final UpstashRedisService redisService;
 
-    public IcarryPickupService(IcarryClient client, OrderRepository orderRepository, ObjectMapper objectMapper) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public IcarryPickupService(IcarryClient client, OrderRepository orderRepository, ObjectMapper objectMapper,
+                               @org.springframework.beans.factory.annotation.Autowired(required = false) UpstashRedisService redisService) {
         this.client = client;
         this.orderRepository = orderRepository;
         this.objectMapper = objectMapper;
+        this.redisService = redisService;
     }
 
     public String createOrUpdatePickupAddress(PickupAddressRequest request) {
@@ -56,8 +61,25 @@ public class IcarryPickupService {
                 throw new IcarryApiException("Pickup address management failed: " + root.get("error").toString());
             }
 
-            String addressId = root.has("pickup_address_id") ? root.get("pickup_address_id").asText() : 
-                              (root.has("id") ? root.get("id").asText() : "SUCCESS_ID");
+            String addressId = null;
+            if (root.has("warehouse_id")) {
+                addressId = root.get("warehouse_id").asText();
+            } else if (root.has("pickup_address_id")) {
+                addressId = root.get("pickup_address_id").asText();
+            } else if (root.has("id")) {
+                addressId = root.get("id").asText();
+            } else {
+                addressId = "SUCCESS_ID";
+            }
+
+            if (redisService != null && addressId != null && !addressId.equals("SUCCESS_ID")) {
+                try {
+                    redisService.set("icarry_pickup_address_id", addressId, 31536000); // cache for 1 year
+                    log.info("Saved pickup address ID to Redis cache: {}", addressId);
+                } catch (Exception re) {
+                    log.warn("Failed to save pickup address ID to Redis: {}", re.getMessage());
+                }
+            }
             
             log.info("Pickup address successfully managed. Address ID: {}", addressId);
             return addressId;

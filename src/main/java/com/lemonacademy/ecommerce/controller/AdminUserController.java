@@ -27,8 +27,9 @@ public class AdminUserController {
     private final UserService userService;
 
     @GetMapping
-    @Operation(summary = "Get all registered users")
+    @Operation(summary = "Get all registered users or search by name, email, or phone")
     public ResponseEntity<ApiResponse<PageResponseDto<UserResponse>>> getAllUsers(
+            @RequestParam(value = "search", required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -36,7 +37,7 @@ public class AdminUserController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        PageResponseDto<UserResponse> users = userService.getAllUsers(pageable);
+        PageResponseDto<UserResponse> users = userService.getAllUsers(search, pageable);
         return ResponseEntity.ok(ApiResponse.success("All users retrieved successfully", users));
     }
 }

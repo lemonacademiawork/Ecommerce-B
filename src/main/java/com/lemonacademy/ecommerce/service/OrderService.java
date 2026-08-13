@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.lemonacademy.ecommerce.security.AdminUserDetails;
+import com.lemonacademy.ecommerce.service.UpstashRedisService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class OrderService {
     private final IcarryTrackingService icarryTrackingService;
     private final IcarryEstimateService icarryEstimateService;
     private final ProductVariantRepository productVariantRepository;
+    private final UpstashRedisService redisService;
 
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -55,6 +57,11 @@ public class OrderService {
     public OrderResponse createOrder(OrderRequest request) {
         // Save order in transaction (default shipment status is PENDING_BOOKING)
         Order savedOrder = saveOrderInTransaction(request);
+        try {
+            redisService.deletePattern("products:category:*");
+        } catch (Exception e) {
+            log.error("Failed to evict products cache on order placement: {}", e.getMessage());
+        }
         return convertToOrderResponse(savedOrder);
     }
 
@@ -352,7 +359,17 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public PageResponseDto<OrderResponse> getAllOrders(Pageable pageable) {
-        Page<Order> orderPage = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return getAllOrders(null, null, null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<OrderResponse> getAllOrders(String search, Pageable pageable) {
+        return getAllOrders(search, null, null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<OrderResponse> getAllOrders(String search, PaymentStatus paymentStatus, OrderStatus status, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.searchAndFilterOrders(search, paymentStatus, status, pageable);
         return PageResponseDto.of(orderPage, this::convertToOrderResponse);
     }
 

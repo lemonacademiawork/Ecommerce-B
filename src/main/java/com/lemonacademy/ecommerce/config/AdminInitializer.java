@@ -20,11 +20,25 @@ public class AdminInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        String adminEmail = System.getenv("ADMIN_EMAIL");
+        String adminPassword = System.getenv("ADMIN_PASSWORD");
+
+        if (adminEmail == null || adminEmail.trim().isEmpty() ||
+            adminPassword == null || adminPassword.trim().isEmpty()) {
+            throw new IllegalStateException("Required environment variables ADMIN_EMAIL and ADMIN_PASSWORD must be configured.");
+        }
+
+        // Migration: If legacy admin exists, delete it to force recreation with new credentials
+        adminRepository.findByEmailIgnoreCase("admin@example.com")
+                .ifPresent(legacyAdmin -> {
+                    adminRepository.delete(legacyAdmin);
+                });
+
         if (adminRepository.count() == 0) {
             Admin defaultAdmin = Admin.builder()
                     .fullName("Default Admin")
-                    .email("admin@example.com")
-                    .password(passwordEncoder.encode("Admin@123"))
+                    .email(adminEmail.trim())
+                    .password(passwordEncoder.encode(adminPassword))
                     .role(Role.ADMIN)
                     .active(true)
                     .build();

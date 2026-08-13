@@ -3,6 +3,7 @@ package com.lemonacademy.ecommerce.shipping.controller;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lemonacademy.ecommerce.dto.OrderResponse;
 import com.lemonacademy.ecommerce.entity.Order;
 import com.lemonacademy.ecommerce.entity.Role;
 import com.lemonacademy.ecommerce.entity.User;
@@ -10,6 +11,7 @@ import com.lemonacademy.ecommerce.repository.OrderRepository;
 import com.lemonacademy.ecommerce.shipping.dto.*;
 import com.lemonacademy.ecommerce.shipping.service.*;
 import com.lemonacademy.ecommerce.shipping.webhook.IcarryWebhookController;
+import com.lemonacademy.ecommerce.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +64,9 @@ public class ShippingControllersTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private OrderService orderService;
+
     @InjectMocks
     private AdminShippingController adminController;
 
@@ -75,6 +80,7 @@ public class ShippingControllersTest {
     private User adminUser;
     private User customerUser;
     private Order order;
+    private OrderResponse orderResponse;
 
     @BeforeEach
     void setUp() {
@@ -92,32 +98,43 @@ public class ShippingControllersTest {
                 .awbNumber("AWB123")
                 .shipmentStatus("BOOKED")
                 .build();
+
+        orderResponse = OrderResponse.builder()
+                .id("23db3d7a-683b-372b-8036-95da3ae5c542")
+                .orderNumber("LH-20260724-ABCD")
+                .shipmentStatus("BOOKED")
+                .build();
     }
 
     @Test
     void testAdminBookShipment() throws Exception {
-        BookShipmentRequest request = new BookShipmentRequest(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        BookShipmentRequest request = new BookShipmentRequest("23db3d7a-683b-372b-8036-95da3ae5c542");
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
-        when(shipmentService.bookShipmentForOrder(any(Order.class))).thenReturn(order);
+        when(shipmentService.bookShipmentForOrder(any(Order.class), any())).thenReturn(order);
+        when(orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542")).thenReturn(orderResponse);
 
         mockMvcAdmin.perform(post("/api/admin/shipping/book")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Shipment booked successfully"));
+                .andExpect(jsonPath("$.message").value("Shipment booked successfully"))
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
     void testAdminCancelShipment() throws Exception {
-        CancelShipmentRequest request = new CancelShipmentRequest(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+        CancelShipmentRequest request = new CancelShipmentRequest("23db3d7a-683b-372b-8036-95da3ae5c542");
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(shipmentService.cancelShipment(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(order);
+        when(orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542")).thenReturn(orderResponse);
 
         mockMvcAdmin.perform(post("/api/admin/shipping/cancel")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
@@ -152,6 +169,7 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminGenerateLabel() throws Exception {
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn("https://icarry.in/labels/1.pdf");
 
         mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542"))
@@ -181,11 +199,14 @@ public class ShippingControllersTest {
 
     @Test
     void testAdminPickupRequest() throws Exception {
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
         when(pickupService.requestPickup(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(order);
+        when(orderService.getOrderDetails("23db3d7a-683b-372b-8036-95da3ae5c542")).thenReturn(orderResponse);
 
         mockMvcAdmin.perform(post("/api/admin/shipping/pickup/request/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.lemonacademy.ecommerce.security.AdminUserDetailsService;
 import org.springframework.context.annotation.Import;
 import com.lemonacademy.ecommerce.security.JwtService;
 import com.lemonacademy.ecommerce.service.CloudinaryService;
+import com.lemonacademy.ecommerce.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ class AdminProductControllerTest {
 
     @MockBean
     private CloudinaryService cloudinaryService;
+
+    @MockBean
+    private ProductService productService;
 
     @MockBean
     private JwtService jwtService;

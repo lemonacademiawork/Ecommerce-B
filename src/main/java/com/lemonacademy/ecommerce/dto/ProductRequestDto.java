@@ -1,6 +1,8 @@
 package com.lemonacademy.ecommerce.dto;
 
 import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,8 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -31,9 +31,9 @@ public class ProductRequestDto {
 
     private String imageUrl;
     
-    private java.util.List<String> imageUrls;
+    private List<String> imageUrls;
     
-    private java.util.List<String> existingImageUrls;
+    private List<String> existingImageUrls;
 
     private Boolean active;
     
@@ -42,8 +42,24 @@ public class ProductRequestDto {
     @NotNull(message = "Category ID is required")
     private UUID categoryId;
 
-    private Integer weight;
-    private Integer length;
-    private Integer breadth;
-    private Integer height;
+    private Double weight;
+    private Double length;
+    private Double breadth;
+    private Double height;
+
+    public Integer getWeightInt() {
+        return weight != null ? (int) Math.round(weight) : null;
+    }
+
+    public Integer getLengthInt() {
+        return length != null ? (int) Math.round(length) : null;
+    }
+
+    public Integer getBreadthInt() {
+        return breadth != null ? (int) Math.round(breadth) : null;
+    }
+
+    public Integer getHeightInt() {
+        return height != null ? (int) Math.round(height) : null;
+    }
 }

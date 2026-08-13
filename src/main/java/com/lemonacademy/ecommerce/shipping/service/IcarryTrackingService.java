@@ -36,7 +36,16 @@ public class IcarryTrackingService {
     public TrackingResponse trackShipment(String trackingNumber) {
         log.info("Requesting tracking details from iCarry for AWB: {}", trackingNumber);
 
+        // Try to resolve tracking reference to shipmentId from database if possible
+        String shipmentId = trackingNumber;
+        Order order = orderRepository.findByAwbNumber(trackingNumber)
+                .orElseGet(() -> orderRepository.findByShipmentId(trackingNumber).orElse(null));
+        if (order != null && order.getShipmentId() != null) {
+            shipmentId = order.getShipmentId();
+        }
+
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("shipment_id", shipmentId);
         body.add("awb", trackingNumber);
 
         try {
@@ -45,12 +54,12 @@ public class IcarryTrackingService {
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {
-                throw new IcarryApiException("Tracking request failed: " + root.get("error").toString());
+                throw new IcarryApiException("Tracking request failed: " + root.get("error").asText(), 400);
             }
 
             String status = root.has("status") ? root.get("status").asText() : "UNKNOWN";
             String courier = root.has("courier") ? root.get("courier").asText() : "Standard Courier";
-            String shipmentId = root.has("shipment_id") ? root.get("shipment_id").asText() : "";
+            String responseShipmentId = root.has("shipment_id") ? root.get("shipment_id").asText() : "";
 
             List<TrackingResponse.TrackingEvent> events = new ArrayList<>();
             if (root.has("history") && root.get("history").isArray()) {
@@ -65,7 +74,7 @@ public class IcarryTrackingService {
 
             return TrackingResponse.builder()
                     .awbNumber(trackingNumber)
-                    .shipmentId(shipmentId)
+                    .shipmentId(responseShipmentId)
                     .status(status)
                     .courierName(courier)
                     .events(events)
@@ -85,7 +94,7 @@ public class IcarryTrackingService {
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 
         if (order.getAwbNumber() == null || order.getAwbNumber().isEmpty()) {
-            throw new IcarryApiException("No tracking AWB number associated with this order.");
+            throw new IcarryApiException("No tracking AWB number associated with this order.", 400);
         }
 
         log.info("Syncing tracking status for order ID: {}, AWB: {}", order.getId(), order.getAwbNumber());

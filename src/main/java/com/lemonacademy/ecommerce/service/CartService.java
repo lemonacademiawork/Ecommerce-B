@@ -89,29 +89,29 @@ public class CartService {
                          item.getProductVariant() != null && item.getProductVariant().getId().equals(request.getVariantId())))
                 .findFirst();
 
+        // Get available stock
+        int availableStock = getAvailableStock(product, variant);
+        if (availableStock <= 0) {
+            throw new InsufficientStockException("Insufficient stock. Available: 0");
+        }
+
         if (existingItem.isPresent()) {
             // Increase quantity
             CartItem cartItem = existingItem.get();
             int newQuantity = cartItem.getQuantity() + request.getQuantity();
 
-            // Validate stock availability (total quantity in cart)
-            int availableStock = variant != null ? variant.getStock() : product.getStock();
+            // Cap to available stock
             if (newQuantity > availableStock) {
-                throw new InsufficientStockException(
-                        "Insufficient stock. Available: " + availableStock
-                                + ", Already in cart: " + cartItem.getQuantity()
-                                + ", Requested: " + request.getQuantity());
+                newQuantity = availableStock;
             }
 
             cartItem.setQuantity(newQuantity);
             cartItemRepository.save(cartItem);
         } else {
-            // Validate stock availability
-            int availableStock = variant != null ? variant.getStock() : product.getStock();
-            if (request.getQuantity() > availableStock) {
-                throw new InsufficientStockException(
-                        "Insufficient stock. Available: " + availableStock
-                                + ", Requested: " + request.getQuantity());
+            int quantityToSet = request.getQuantity();
+            // Cap to available stock
+            if (quantityToSet > availableStock) {
+                quantityToSet = availableStock;
             }
 
             // Create new CartItem
@@ -119,7 +119,7 @@ public class CartService {
                     .cart(cart)
                     .product(product)
                     .productVariant(variant)
-                    .quantity(request.getQuantity())
+                    .quantity(quantityToSet)
                     .build();
             cartItemRepository.save(cartItem);
             cart.getItems().add(cartItem);
@@ -165,14 +165,17 @@ public class CartService {
         // Validate stock availability
         Product product = cartItem.getProduct();
         ProductVariant variant = cartItem.getProductVariant();
-        int availableStock = variant != null ? variant.getStock() : product.getStock();
-        if (request.getQuantity() > availableStock) {
-            throw new InsufficientStockException(
-                    "Insufficient stock. Available: " + availableStock
-                            + ", Requested: " + request.getQuantity());
+        int availableStock = getAvailableStock(product, variant);
+        if (availableStock <= 0) {
+            throw new InsufficientStockException("Insufficient stock. Available: 0");
         }
 
-        cartItem.setQuantity(request.getQuantity());
+        int quantityToSet = request.getQuantity();
+        if (quantityToSet > availableStock) {
+            quantityToSet = availableStock;
+        }
+
+        cartItem.setQuantity(quantityToSet);
         cartItemRepository.save(cartItem);
 
         return buildCartResponse(cartItem.getCart());
@@ -217,6 +220,11 @@ public class CartService {
         return (User) authentication.getPrincipal();
     }
 
+    private int getAvailableStock(Product product, ProductVariant variant) {
+        Integer stock = variant != null ? variant.getStock() : product.getStock();
+        return stock != null ? stock : 0;
+    }
+
     private CartResponse buildCartResponse(Cart cart) {
         List<CartItemResponse> itemResponses = cart.getItems().stream()
                 .map(this::convertToCartItemResponse)
@@ -256,6 +264,7 @@ public class CartService {
                 .variantId(variant != null ? variant.getId() : null)
                 .variantName(variant != null ? variant.getVariantName() : null)
                 .variant(variant != null ? convertToVariantDto(variant) : null)
+                .stock(getAvailableStock(product, variant))
                 .build();
     }
     

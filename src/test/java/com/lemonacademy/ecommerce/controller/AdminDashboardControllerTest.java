@@ -60,6 +60,7 @@ class AdminDashboardControllerTest {
                 .pendingOrders(5L)
                 .deliveredOrders(30L)
                 .cancelledOrders(3L)
+                .totalRevenue(java.math.BigDecimal.valueOf(1500.00))
                 .build();
     }
 
@@ -70,9 +71,10 @@ class AdminDashboardControllerTest {
         mockMvc.perform(get("/api/admin/dashboard").with(user(adminUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalUsers").value(100))
-                .andExpect(jsonPath("$.data.totalProducts").value(50))
-                .andExpect(jsonPath("$.data.totalOrders").value(200));
+                .andExpect(jsonPath("$.data.totalUsers").value(10))
+                .andExpect(jsonPath("$.data.totalProducts").value(25))
+                .andExpect(jsonPath("$.data.totalOrders").value(50))
+                .andExpect(jsonPath("$.data.totalRevenue").value(1500.00));
     }
 
     @Test

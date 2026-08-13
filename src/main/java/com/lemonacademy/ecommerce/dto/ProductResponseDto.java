@@ -36,4 +36,10 @@ public class ProductResponseDto {
     private Integer height;
 
     private java.util.List<ProductVariantResponseDto> variants;
+    private String shareUrl;
+
+    // Review & Rating fields
+    private Double averageRating;
+    private Long reviewCount;
+    private java.util.Map<Integer, Long> ratingDistribution;
 }

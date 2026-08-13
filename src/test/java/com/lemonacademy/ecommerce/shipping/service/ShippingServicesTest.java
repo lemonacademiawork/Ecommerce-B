@@ -56,11 +56,11 @@ public class ShippingServicesTest {
     @BeforeEach
     void setUp() {
         estimateService = new IcarryEstimateService(client, config, objectMapper);
-        shipmentService = new IcarryShipmentService(client, config, orderRepository, objectMapper);
+        shipmentService = new IcarryShipmentService(client, config, orderRepository, objectMapper, null);
         trackingService = new IcarryTrackingService(client, orderRepository, objectMapper);
         webhookService = new IcarryWebhookService(orderRepository, config);
         labelService = new IcarryLabelService(client, orderRepository, objectMapper);
-        pickupService = new IcarryPickupService(client, orderRepository, objectMapper);
+        pickupService = new IcarryPickupService(client, orderRepository, objectMapper, null);
 
         Address address = Address.builder()
                 .fullName("John Doe")
@@ -148,9 +148,11 @@ public class ShippingServicesTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Order cancelledOrder = shipmentService.cancelShipment(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
-
-        assertEquals("CANCELLED", cancelledOrder.getShipmentStatus());
-        assertEquals(com.lemonacademy.ecommerce.entity.OrderStatus.CANCELLED, cancelledOrder.getStatus());
+ 
+        assertEquals("PENDING_BOOKING", cancelledOrder.getShipmentStatus());
+        assertNull(cancelledOrder.getStatus());
+        assertNull(cancelledOrder.getAwbNumber());
+        assertNull(cancelledOrder.getShipmentId());
     }
 
     @Test

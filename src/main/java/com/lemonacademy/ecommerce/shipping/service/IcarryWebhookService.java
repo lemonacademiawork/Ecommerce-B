@@ -46,8 +46,17 @@ public class IcarryWebhookService {
         log.info("Updating order ID: {} via Webhook. ShipmentStatus -> {}, OrderStatus -> {}", 
                  order.getId(), mappedShipmentStatus, mappedOrderStatus);
 
-        order.setShipmentStatus(mappedShipmentStatus);
-        order.setStatus(mappedOrderStatus);
+        if ("CANCELLED".equals(mappedShipmentStatus)) {
+            order.setShipmentId(null);
+            order.setAwbNumber(null);
+            order.setCourierName(null);
+            order.setTrackingNumber(null);
+            order.setLabelUrl(null);
+            order.setShipmentStatus("PENDING_BOOKING");
+        } else {
+            order.setShipmentStatus(mappedShipmentStatus);
+            order.setStatus(mappedOrderStatus);
+        }
         order.setLastTrackingSync(LocalDateTime.now());
 
         if ("DELIVERED".equals(mappedShipmentStatus)) {

@@ -129,7 +129,7 @@ class CartControllerTest {
                         .with(user(customerUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.cartId").value(1));
+                .andExpect(jsonPath("$.data.cartId").value("23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test

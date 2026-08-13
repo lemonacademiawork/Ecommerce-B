@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -79,6 +80,7 @@ class ProductControllerTest {
                 .active(true)
                 .categoryId(UUID.randomUUID())
                 .categoryName("Electronics")
+                .shareUrl("https://api.lemonhousecraft.in/api/products/share/23db3d7a-683b-372b-8036-95da3ae5c542")
                 .build();
 
         listResponse = Collections.singletonList(productResponseDto);
@@ -117,7 +119,7 @@ class ProductControllerTest {
     void getProducts_ByCategory_Success() throws Exception {
         when(productService.getActiveProductsByCategory(any(UUID.class), any(Pageable.class))).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/api/products?categoryId=1"))
+        mockMvc.perform(get("/api/products?categoryId=23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].name").value("Laptop"));
     }
@@ -155,8 +157,9 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products/23db3d7a-683b-372b-8036-95da3ae5c542"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.name").value("Laptop"));
+                .andExpect(jsonPath("$.data.id").value("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .andExpect(jsonPath("$.data.name").value("Laptop"))
+                .andExpect(jsonPath("$.data.shareUrl").value("https://api.lemonhousecraft.in/api/products/share/23db3d7a-683b-372b-8036-95da3ae5c542"));
     }
 
     @Test
@@ -164,7 +167,7 @@ class ProductControllerTest {
         when(productService.getProductById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
                 .thenThrow(new ResourceNotFoundException("Product not found with id: 99"));
 
-        mockMvc.perform(get("/api/products/99"))
+        mockMvc.perform(get("/api/products/d2636d80-51bd-3a57-9ac2-4b559df83916"))
                 .andExpect(status().isNotFound());
     }
 
@@ -242,10 +245,26 @@ class ProductControllerTest {
 
     @Test
     void deleteProduct_NotFound_Returns404() throws Exception {
-        when(productService.getProductById(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916")))
-                .thenThrow(new ResourceNotFoundException("Product not found with id: 99"));
+        doThrow(new ResourceNotFoundException("Product not found with id: d2636d80-51bd-3a57-9ac2-4b559df83916"))
+                .when(productService).deleteProduct(UUID.fromString("d2636d80-51bd-3a57-9ac2-4b559df83916"));
 
-        mockMvc.perform(get("/api/products/99"))
+        mockMvc.perform(delete("/api/products/d2636d80-51bd-3a57-9ac2-4b559df83916")
+                        .with(user(adminUser))
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getProductSharePreview_Success() throws Exception {
+        when(productService.getProductById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542")))
+                .thenReturn(productResponseDto);
+
+        mockMvc.perform(get("/api/products/share/23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("og:title")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Laptop")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Gaming Laptop")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("https://lemonhousecraft.in/product/23db3d7a-683b-372b-8036-95da3ae5c542")));
     }
 }

@@ -27,4 +27,5 @@ public class CartItemResponse {
     private UUID variantId;
     private String variantName;
     private ProductVariantResponseDto variant;
+    private Integer stock;
 }

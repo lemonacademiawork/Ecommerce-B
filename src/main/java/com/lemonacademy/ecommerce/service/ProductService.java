@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,9 @@ import com.lemonacademy.ecommerce.entity.Product;
 import com.lemonacademy.ecommerce.exception.ResourceNotFoundException;
 import com.lemonacademy.ecommerce.repository.CategoryRepository;
 import com.lemonacademy.ecommerce.repository.ProductRepository;
+import com.lemonacademy.ecommerce.repository.ProductReviewRepository;
+import java.util.Map;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,24 +35,74 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final CloudinaryService cloudinaryService;
+    private final UpstashRedisService redisService;
+    private final ObjectMapper objectMapper;
+    private final ProductReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public PageResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
-        Page<Product> productPage = productRepository.findAll(pageable);
-        return PageResponseDto.of(productPage, this::convertToDto);
+        String cacheKey = makeCacheKey("global-all", pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAll(pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
     }
 
     @Transactional(readOnly = true)
     public PageResponseDto<ProductResponseDto> getActiveProducts(Pageable pageable) {
-        Page<Product> productPage = productRepository.findAllByActiveTrue(pageable);
-        return PageResponseDto.of(productPage, this::convertToDto);
+        String cacheKey = makeCacheKey("global-active", pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAllByActiveTrue(pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
     }
 
     @Transactional(readOnly = true)
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        return convertToDto(product);
+        ProductResponseDto dto = convertToDto(product);
+        populateRatingSummary(dto);
+        return dto;
+    }
+
+    public static final ThreadLocal<String> CACHE_STATUS = ThreadLocal.withInitial(() -> "MISS");
+
+    private String makeCacheKey(String prefix, List<UUID> categoryIds, Pageable pageable) {
+        String ids = categoryIds.stream().map(UUID::toString).sorted().collect(Collectors.joining(","));
+        return "products:category:" + prefix + ":" + ids + ":" + pageable.getPageNumber() + ":" + pageable.getPageSize() + ":" + pageable.getSort().toString().replaceAll("[\\s:]", "");
+    }
+
+    private String makeCacheKey(String prefix, UUID categoryId, Pageable pageable) {
+        return makeCacheKey(prefix, List.of(categoryId), pageable);
+    }
+
+    private String makeCacheKey(String prefix, Pageable pageable) {
+        return "products:category:" + prefix + ":" + pageable.getPageNumber() + ":" + pageable.getPageSize() + ":" + pageable.getSort().toString().replaceAll("[\\s:]", "");
+    }
+
+    private PageResponseDto<ProductResponseDto> getCachedOrFetch(String cacheKey, java.util.function.Supplier<PageResponseDto<ProductResponseDto>> dbQuery) {
+        CACHE_STATUS.set("MISS");
+        try {
+            String cachedJson = redisService.get(cacheKey);
+            if (cachedJson != null) {
+                CACHE_STATUS.set("HIT");
+                return objectMapper.readValue(cachedJson, new TypeReference<PageResponseDto<ProductResponseDto>>() {});
+            }
+        } catch (Exception e) {
+            // Fall back gracefully to database
+        }
+        
+        PageResponseDto<ProductResponseDto> data = dbQuery.get();
+        
+        try {
+            String json = objectMapper.writeValueAsString(data);
+            redisService.set(cacheKey, json, 300); // 5 min TTL
+        } catch (Exception e) {
+            // Ignore Redis write failures
+        }
+        
+        return data;
     }
 
     @Transactional(readOnly = true)
@@ -55,8 +110,11 @@ public class ProductService {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
-        Page<Product> productPage = productRepository.findAllByCategoryId(categoryId, pageable);
-        return PageResponseDto.of(productPage, this::convertToDto);
+        String cacheKey = makeCacheKey("all", categoryId, pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAllByCategoryId(categoryId, pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -64,8 +122,29 @@ public class ProductService {
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         }
-        Page<Product> productPage = productRepository.findAllByCategoryIdAndActiveTrue(categoryId, pageable);
-        return PageResponseDto.of(productPage, this::convertToDto);
+        String cacheKey = makeCacheKey("active", categoryId, pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAllByCategoryIdAndActiveTrue(categoryId, pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<ProductResponseDto> getProductsByCategories(List<UUID> categoryIds, Pageable pageable) {
+        String cacheKey = makeCacheKey("all-batch", categoryIds, pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAllByCategoryIdIn(categoryIds, pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<ProductResponseDto> getActiveProductsByCategories(List<UUID> categoryIds, Pageable pageable) {
+        String cacheKey = makeCacheKey("active-batch", categoryIds, pageable);
+        return getCachedOrFetch(cacheKey, () -> {
+            Page<Product> productPage = productRepository.findAllByCategoryIdInAndActiveTrue(categoryIds, pageable);
+            return PageResponseDto.of(productPage, this::convertToDto);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -73,6 +152,37 @@ public class ProductService {
         Page<Product> productPage = (activeOnly != null && activeOnly)
                 ? productRepository.searchActiveProducts(query, pageable)
                 : productRepository.searchProducts(query, pageable);
+        return PageResponseDto.of(productPage, this::convertToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<ProductResponseDto> getProductsByStockStatus(String stockFilter, Boolean activeOnly, Pageable pageable) {
+        boolean active = activeOnly != null && activeOnly;
+        String normalizedFilter = stockFilter != null ? stockFilter.trim().toUpperCase() : "";
+        Page<Product> productPage;
+
+        switch (normalizedFilter) {
+            case "OUT_OF_STOCK", "OUTOFSTOCK", "0" -> {
+                productPage = active
+                        ? productRepository.findActiveOutOfStockProducts(pageable)
+                        : productRepository.findOutOfStockProducts(pageable);
+            }
+            case "LOW_STOCK", "LOWSTOCK", "LOW" -> {
+                productPage = active
+                        ? productRepository.findActiveLowStockProducts(pageable)
+                        : productRepository.findLowStockProducts(pageable);
+            }
+            case "IN_STOCK", "INSTOCK" -> {
+                productPage = active
+                        ? productRepository.findActiveInStockProducts(pageable)
+                        : productRepository.findInStockProducts(pageable);
+            }
+            default -> {
+                productPage = active
+                        ? productRepository.findAllByActiveTrue(pageable)
+                        : productRepository.findAll(pageable);
+            }
+        }
         return PageResponseDto.of(productPage, this::convertToDto);
     }
 
@@ -101,13 +211,18 @@ public class ProductService {
                     .active(dto.getActive() != null ? dto.getActive() : true)
                     .hasVariants(dto.getHasVariants() != null ? dto.getHasVariants() : false)
                     .category(category)
-                    .weight(dto.getWeight())
-                    .length(dto.getLength())
-                    .breadth(dto.getBreadth())
-                    .height(dto.getHeight())
+                    .weight(dto.getWeightInt())
+                    .length(dto.getLengthInt())
+                    .breadth(dto.getBreadthInt())
+                    .height(dto.getHeightInt())
                     .build();
 
             Product savedProduct = productRepository.save(product);
+            try {
+                redisService.deletePattern("products:category:*");
+            } catch (Exception e) {
+                // ignore
+            }
             return convertToDto(savedProduct);
         } catch (Exception e) {
             deleteImages(uploadedUrls);
@@ -146,12 +261,17 @@ public class ProductService {
             product.setHasVariants(dto.getHasVariants());
         }
         product.setCategory(category);
-        product.setWeight(dto.getWeight());
-        product.setLength(dto.getLength());
-        product.setBreadth(dto.getBreadth());
-        product.setHeight(dto.getHeight());
+        product.setWeight(dto.getWeightInt());
+        product.setLength(dto.getLengthInt());
+        product.setBreadth(dto.getBreadthInt());
+        product.setHeight(dto.getHeightInt());
 
         Product updatedProduct = productRepository.save(product);
+        try {
+            redisService.deletePattern("products:category:*");
+        } catch (Exception e) {
+            // ignore
+        }
         return convertToDto(updatedProduct);
     }
 
@@ -169,6 +289,11 @@ public class ProductService {
         List<String> imagesToDelete = new ArrayList<>(product.getImageUrls());
         productRepository.delete(product);
         deleteImages(imagesToDelete);
+        try {
+            redisService.deletePattern("products:category:*");
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     @Transactional(readOnly = true)
@@ -265,6 +390,39 @@ public class ProductService {
                         .createdAt(v.getCreatedAt())
                         .updatedAt(v.getUpdatedAt())
                         .build()).collect(Collectors.toList()) : new ArrayList<>())
+                .shareUrl("https://api.lemonhousecraft.in/api/products/share/" + product.getId())
                 .build();
+    }
+
+    private void populateRatingSummary(ProductResponseDto dto) {
+        try {
+            Double avg = reviewRepository.getAverageRatingByProductId(dto.getId());
+            Long count = reviewRepository.getReviewCountByProductId(dto.getId());
+            List<Object[]> distributionRaw = reviewRepository.getRatingDistributionByProductId(dto.getId());
+
+            Map<Integer, Long> distribution = new HashMap<>();
+            for (int i = 1; i <= 5; i++) {
+                distribution.put(i, 0L);
+            }
+
+            if (distributionRaw != null) {
+                for (Object[] row : distributionRaw) {
+                    Integer rating = (Integer) row[0];
+                    Long cnt = (Long) row[1];
+                    if (rating != null) {
+                        distribution.put(rating, cnt);
+                    }
+                }
+            }
+
+            dto.setAverageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+            dto.setReviewCount(count != null ? count : 0L);
+            dto.setRatingDistribution(distribution);
+        } catch (Exception e) {
+            // Log and default
+            dto.setAverageRating(0.0);
+            dto.setReviewCount(0L);
+            dto.setRatingDistribution(Map.of(1, 0L, 2, 0L, 3, 0L, 4, 0L, 5, 0L));
+        }
     }
 }

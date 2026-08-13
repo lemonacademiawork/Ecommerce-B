@@ -13,6 +13,7 @@ import com.lemonacademy.ecommerce.shipping.exception.DuplicateShipmentException;
 import com.lemonacademy.ecommerce.shipping.exception.IcarryApiException;
 import com.lemonacademy.ecommerce.shipping.exception.ShipmentCancelledException;
 import com.lemonacademy.ecommerce.shipping.util.DimensionParser;
+import com.lemonacademy.ecommerce.service.UpstashRedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,17 +32,26 @@ public class IcarryShipmentService {
     private final IcarryConfig config;
     private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper;
+    private final UpstashRedisService redisService;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public IcarryShipmentService(IcarryClient client, IcarryConfig config, 
-                                 OrderRepository orderRepository, ObjectMapper objectMapper) {
+                                 OrderRepository orderRepository, ObjectMapper objectMapper,
+                                 @org.springframework.beans.factory.annotation.Autowired(required = false) UpstashRedisService redisService) {
         this.client = client;
         this.config = config;
         this.orderRepository = orderRepository;
         this.objectMapper = objectMapper;
+        this.redisService = redisService;
     }
 
     @Transactional
     public Order bookShipmentForOrder(Order order) {
+        return bookShipmentForOrder(order, null);
+    }
+
+    @Transactional
+    public Order bookShipmentForOrder(Order order, String customPickupAddressId) {
         if (order.getShipmentId() != null) {
             log.warn("Shipment already booked for order ID: {}. Shipment ID: {}", order.getId(), order.getShipmentId());
             throw new DuplicateShipmentException("Shipment is already booked for this order: " + order.getShipmentId());
@@ -51,8 +61,17 @@ public class IcarryShipmentService {
 
         Address addr = order.getAddress();
         String contents = order.getItems().stream()
-                .map(item -> item.getProduct().getName() + " x" + item.getQuantity())
+                .map(item -> {
+                    String name = item.getProduct().getName();
+                    if (name == null) name = "Item";
+                    name = name.replaceAll("[^\\x20-\\x7E]", "").trim();
+                    if (name.isEmpty()) name = "Item";
+                    return name + " x" + item.getQuantity();
+                })
                 .collect(Collectors.joining(", "));
+        if (contents.trim().length() < 3) {
+            contents = "E-Commerce Parcel Items";
+        }
         if (contents.length() > 200) {
             contents = contents.substring(0, 197) + "...";
         }
@@ -93,8 +112,21 @@ public class IcarryShipmentService {
         body.add("breadth", String.valueOf(breadth));
         body.add("height", String.valueOf(height));
         
-        // Required pickup address reference
-        body.add("pickup_address_id", config.getPickupAddressId());
+        // Determine pickup address ID
+        String pickupAddressId = customPickupAddressId;
+        if (pickupAddressId == null || pickupAddressId.isEmpty()) {
+            try {
+                if (redisService != null) {
+                    pickupAddressId = redisService.get("icarry_pickup_address_id");
+                }
+            } catch (Exception e) {
+                log.warn("Failed to retrieve pickup address ID from Redis: {}", e.getMessage());
+            }
+        }
+        if (pickupAddressId == null || pickupAddressId.isEmpty()) {
+            pickupAddressId = config.getPickupAddressId();
+        }
+        body.add("pickup_address_id", pickupAddressId);
 
         try {
             // DO NOT RETRY shipment booking to prevent duplicates
@@ -102,7 +134,7 @@ public class IcarryShipmentService {
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {
-                throw new IcarryApiException("Shipment booking failed: " + root.get("error").toString());
+                throw new IcarryApiException("Shipment booking failed: " + root.get("error").asText(), 400);
             }
 
             String shipmentId = root.has("shipment_id") ? root.get("shipment_id").asText() : null;
@@ -111,7 +143,7 @@ public class IcarryShipmentService {
             }
 
             if (shipmentId == null) {
-                throw new IcarryApiException("Shipment booking response missing shipment_id: " + responseBody);
+                throw new IcarryApiException("Shipment booking response missing shipment_id: " + responseBody, 400);
             }
 
             String awb = root.has("awb") ? root.get("awb").asText() : 
@@ -129,7 +161,6 @@ public class IcarryShipmentService {
             order.setAwbNumber(awb);
             order.setTrackingNumber(awb);
             order.setCourierName(courier);
-            order.setShippingCharge(BigDecimal.valueOf(rate));
             order.setShipmentStatus("BOOKED");
             
             // Default 3-5 days delivery date
@@ -155,7 +186,7 @@ public class IcarryShipmentService {
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 
         if (order.getShipmentId() == null) {
-            throw new IcarryApiException("No shipment is booked for this order.");
+            throw new IcarryApiException("No shipment is booked for this order.", 400);
         }
 
         if ("CANCELLED".equalsIgnoreCase(order.getShipmentStatus())) {
@@ -163,7 +194,7 @@ public class IcarryShipmentService {
         }
 
         if ("DELIVERED".equalsIgnoreCase(order.getShipmentStatus())) {
-            throw new IcarryApiException("Cannot cancel a delivered shipment.");
+            throw new IcarryApiException("Cannot cancel a delivered shipment.", 400);
         }
 
         log.info("Cancelling shipment for order ID: {}, Shipment ID: {}", order.getId(), order.getShipmentId());
@@ -178,12 +209,16 @@ public class IcarryShipmentService {
             JsonNode root = objectMapper.readTree(responseBody);
 
             if (root.has("error")) {
-                throw new IcarryApiException("Cancellation failed: " + root.get("error").toString());
+                throw new IcarryApiException("Cancellation failed: " + root.get("error").asText(), 400);
             }
 
-            // Update order details
-            order.setShipmentStatus("CANCELLED");
-            order.setStatus(com.lemonacademy.ecommerce.entity.OrderStatus.CANCELLED);
+            // Clear shipment details so it can be re-booked
+            order.setShipmentId(null);
+            order.setAwbNumber(null);
+            order.setCourierName(null);
+            order.setTrackingNumber(null);
+            order.setLabelUrl(null);
+            order.setShipmentStatus("PENDING_BOOKING");
             order.setLastTrackingSync(LocalDateTime.now());
 
             log.info("Shipment cancelled successfully for order ID: {}", orderId);

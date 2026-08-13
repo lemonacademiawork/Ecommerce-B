@@ -6,6 +6,8 @@ import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.OrderResponse;
 import com.lemonacademy.ecommerce.dto.OrderStatusRequest;
 import com.lemonacademy.ecommerce.dto.PageResponseDto;
+import com.lemonacademy.ecommerce.entity.OrderStatus;
+import com.lemonacademy.ecommerce.entity.PaymentStatus;
 import com.lemonacademy.ecommerce.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,9 @@ public class AdminOrderController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponseDto<OrderResponse>>> getAllOrders(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "paymentStatus", required = false) PaymentStatus paymentStatus,
+            @RequestParam(value = "status", required = false) OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -35,7 +40,7 @@ public class AdminOrderController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        PageResponseDto<OrderResponse> response = orderService.getAllOrders(pageable);
+        PageResponseDto<OrderResponse> response = orderService.getAllOrders(search, paymentStatus, status, pageable);
         return ResponseEntity.ok(ApiResponse.success("All orders retrieved successfully", response));
     }
 

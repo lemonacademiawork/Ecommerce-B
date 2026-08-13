@@ -1,6 +1,7 @@
 package com.lemonacademy.ecommerce.controller;
 
 import java.util.UUID;
+import java.util.List;
 
 import com.lemonacademy.ecommerce.dto.ApiResponse;
 import com.lemonacademy.ecommerce.dto.CategoryDto;
@@ -14,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
@@ -25,10 +24,16 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    @Operation(summary = "Get all categories")
+    @Operation(summary = "Get all categories or search by category name")
     public ResponseEntity<ApiResponse<List<CategoryDto>>> getAllCategories(
+            @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
-        List<CategoryDto> categories = all ? categoryService.getAllCategories() : categoryService.getActiveCategories();
+        List<CategoryDto> categories;
+        if (search != null && !search.trim().isEmpty()) {
+            categories = categoryService.searchCategories(search, all);
+        } else {
+            categories = all ? categoryService.getAllCategories() : categoryService.getActiveCategories();
+        }
         return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully", categories));
     }
 

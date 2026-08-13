@@ -104,10 +104,10 @@ public class IcarryClient {
                 log.info("[iCarry API Response] CorrelationID: {}, Status: {}, Time: {}ms, Body: {}",
                         correlationId, response.getStatusCode(), duration, responseBody);
 
-                if (responseBody != null && responseBody.contains("\"success\":0") && 
-                    responseBody.toLowerCase().contains("token") && 
-                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid"))) {
-                    throw new IcarryApiException("Token expired or invalid in 200 OK response", 401);
+                if (responseBody != null && 
+                    responseBody.toLowerCase().contains("api_token") && 
+                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid") || responseBody.toLowerCase().contains("permission"))) {
+                    throw new IcarryApiException("Token expired or invalid in response", 401);
                 }
 
                 return responseBody;
@@ -157,10 +157,10 @@ public class IcarryClient {
                 String responseBody = response.getBody();
                 log.info("[iCarry API Response] CorrelationID: {}, Status: {}, Time: {}ms", correlationId, response.getStatusCode(), duration);
 
-                if (responseBody != null && responseBody.contains("\"success\":0") && 
-                    responseBody.toLowerCase().contains("token") && 
-                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid"))) {
-                    throw new IcarryApiException("Token expired or invalid in 200 OK response", 401);
+                if (responseBody != null && 
+                    responseBody.toLowerCase().contains("api_token") && 
+                    (responseBody.toLowerCase().contains("expired") || responseBody.toLowerCase().contains("invalid") || responseBody.toLowerCase().contains("permission"))) {
+                    throw new IcarryApiException("Token expired or invalid in response", 401);
                 }
 
                 return responseBody;
