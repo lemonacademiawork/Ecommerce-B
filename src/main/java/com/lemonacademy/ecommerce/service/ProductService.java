@@ -415,12 +415,12 @@ public class ProductService {
                 }
             }
 
-            dto.setAverageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+            dto.setAverageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : null);
             dto.setReviewCount(count != null ? count : 0L);
             dto.setRatingDistribution(distribution);
         } catch (Exception e) {
             // Log and default
-            dto.setAverageRating(0.0);
+            dto.setAverageRating(null);
             dto.setReviewCount(0L);
             dto.setRatingDistribution(Map.of(1, 0L, 2, 0L, 3, 0L, 4, 0L, 5, 0L));
         }

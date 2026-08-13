@@ -261,7 +261,7 @@ public class ProductReviewServiceImpl implements ProductReviewService {
         }
 
         return ProductRatingSummaryDto.builder()
-                .averageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0)
+                .averageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : null)
                 .reviewCount(count != null ? count : 0L)
                 .ratingDistribution(distribution)
                 .build();

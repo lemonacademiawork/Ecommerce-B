@@ -1,0 +1,15 @@
+# Ignore common files but allow target/ for jar packaging
+.git
+.github
+node_modules
+.vscode
+.idea
+*.log
+.env
+env.properties
+# Allow target folder and jar
+!target/
+!target/*.jar
+# Ignore other target files
+target/*
+!target/*.jar
