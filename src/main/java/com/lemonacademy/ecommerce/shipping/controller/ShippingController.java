@@ -21,6 +21,7 @@ import com.lemonacademy.ecommerce.entity.Product;
 import com.lemonacademy.ecommerce.repository.CartRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -88,7 +89,26 @@ public class ShippingController {
                 .parcelValue(request.getOrderValue())
                 .build();
 
-        List<CourierEstimateResponse> estimates = estimateService.getEstimate(estimateRequest);
+        List<CourierEstimateResponse> estimates = new java.util.ArrayList<>();
+        try {
+            List<CourierEstimateResponse> fetched = estimateService.getEstimate(estimateRequest);
+            if (fetched != null && !fetched.isEmpty()) {
+                estimates = fetched;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get dynamic courier estimate from iCarry: {}. Using reliable standard delivery fallback.", e.getMessage());
+        }
+
+        if (estimates.isEmpty()) {
+            estimates.add(CourierEstimateResponse.builder()
+                    .courierId("standard")
+                    .courierName("Standard Delivery")
+                    .courierGroupName("Standard")
+                    .rate(BigDecimal.valueOf(100.00))
+                    .eta("3-5 business days")
+                    .build());
+        }
+
         return ResponseEntity.ok(ApiResponse.success("Shipping estimates retrieved successfully", estimates));
     }
 }

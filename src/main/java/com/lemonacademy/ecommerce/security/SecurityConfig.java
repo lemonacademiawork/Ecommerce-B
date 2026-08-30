@@ -63,7 +63,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/admin/auth/**",
-                        "/api/products/**", "/api/categories/**",
+                        "/api/products/**", "/api/categories/**", "/api/shipping/**",
                         "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
                         "/oauth2/**", "/login/oauth2/**", "/api/webhooks/icarry/**", "/api/webhooks/razorpay/**", "/images/**", "/api/health/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
