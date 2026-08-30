@@ -33,7 +33,6 @@ import java.util.UUID;
     "razorpay.key.secret=stub-secret",
     "UPSTASH_REDIS_REST_URL=https://stub.upstash.io",
     "UPSTASH_REDIS_REST_TOKEN=stub-token",
-    "upi.id=stub-upi",
     "icarry.api-key=stub-key",
     "icarry.username=stub-username",
     "zoepact.api.template-url=https://stub.zoepact.io",

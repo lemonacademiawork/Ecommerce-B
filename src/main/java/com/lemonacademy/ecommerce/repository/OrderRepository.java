@@ -27,6 +27,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     java.util.Optional<Order> findByAwbNumber(String awbNumber);
     java.util.Optional<Order> findByShipmentId(String shipmentId);
     java.util.Optional<Order> findByOrderNumber(String orderNumber);
+    java.util.Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
     Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<Order> findAllByPaymentStatus(PaymentStatus paymentStatus, Pageable pageable);
     List<Order> findAllByCreatedAtGreaterThanEqual(LocalDateTime startDateTime);

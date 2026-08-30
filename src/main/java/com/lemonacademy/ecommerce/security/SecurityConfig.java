@@ -65,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/admin/auth/**",
                         "/api/products/**", "/api/categories/**",
                         "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-                        "/oauth2/**", "/login/oauth2/**", "/api/webhooks/icarry/**", "/images/**", "/api/health/**").permitAll()
+                        "/oauth2/**", "/login/oauth2/**", "/api/webhooks/icarry/**", "/api/webhooks/razorpay/**", "/images/**", "/api/health/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**", "/api/user/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()

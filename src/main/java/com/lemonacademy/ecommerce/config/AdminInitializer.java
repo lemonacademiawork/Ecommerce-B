@@ -53,5 +53,8 @@ public class AdminInitializer implements CommandLineRunner {
                     .build();
             couponRepository.save(firstOrderCoupon);
         }
+
+        couponRepository.findByCode("LEMON20").ifPresent(couponRepository::delete);
+        couponRepository.findByCode("lemon20").ifPresent(couponRepository::delete);
     }
 }

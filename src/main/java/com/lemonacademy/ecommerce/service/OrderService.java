@@ -230,27 +230,32 @@ public class OrderService {
         BigDecimal discountAmount = BigDecimal.ZERO;
         Coupon appliedCoupon = null;
         if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
-            appliedCoupon = couponRepository.findByCode(request.getCouponCode().trim().toUpperCase())
-                    .orElseThrow(() -> new InvalidOperationException("Invalid coupon code"));
+            String code = request.getCouponCode().trim().toUpperCase();
+            if (!"LEMON20".equals(code)) {
+                appliedCoupon = couponRepository.findByCode(code)
+                        .orElseThrow(() -> new InvalidOperationException("Invalid coupon code"));
 
-            if (!Boolean.TRUE.equals(appliedCoupon.getActive())) {
-                throw new InvalidOperationException("Coupon is no longer active");
+                if (!Boolean.TRUE.equals(appliedCoupon.getActive())) {
+                    throw new InvalidOperationException("Coupon is no longer active");
+                }
+
+                // First order only restriction: check if user has any orders
+                boolean hasOrders = orderRepository.findByUserOrderByCreatedAtDesc(user, Pageable.unpaged()).hasContent();
+                if (hasOrders) {
+                    throw new InvalidOperationException("This coupon is only valid for your first order.");
+                }
+
+                // Check if already used by user (just in case they cancel/retry, though first order check handles most of it)
+                if (userCouponRepository.existsByUserAndCoupon(user, appliedCoupon)) {
+                    throw new InvalidOperationException("You have already used this coupon.");
+                }
+
+                // Calculate discount (discountPercentage is e.g. 5.0 for 5%)
+                BigDecimal percentage = appliedCoupon.getDiscountPercentage().divide(BigDecimal.valueOf(100));
+                discountAmount = subtotal.multiply(percentage);
+            } else {
+                log.info("Ignoring deprecated/removed coupon code: {}", code);
             }
-
-            // First order only restriction: check if user has any orders
-            boolean hasOrders = orderRepository.findByUserOrderByCreatedAtDesc(user, Pageable.unpaged()).hasContent();
-            if (hasOrders) {
-                throw new InvalidOperationException("This coupon is only valid for your first order.");
-            }
-
-            // Check if already used by user (just in case they cancel/retry, though first order check handles most of it)
-            if (userCouponRepository.existsByUserAndCoupon(user, appliedCoupon)) {
-                throw new InvalidOperationException("You have already used this coupon.");
-            }
-
-            // Calculate discount (discountPercentage is e.g. 5.0 for 5%)
-            BigDecimal percentage = appliedCoupon.getDiscountPercentage().divide(BigDecimal.valueOf(100));
-            discountAmount = subtotal.multiply(percentage);
         }
 
         BigDecimal totalAmount = subtotal.add(shippingCharge).subtract(discountAmount);

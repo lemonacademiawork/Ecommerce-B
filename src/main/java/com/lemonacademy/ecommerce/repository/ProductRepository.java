@@ -22,6 +22,12 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findAllByCategoryIdIn(List<UUID> categoryIds, Pageable pageable);
     Page<Product> findAllByCategoryIdInAndActiveTrue(List<UUID> categoryIds, Pageable pageable);
 
+    @Query("SELECT p FROM Product p WHERE p.active = true AND (p.category IS NULL OR LOWER(p.category.name) != LOWER(:categoryName))")
+    Page<Product> findAllActiveExcludingCategory(@Param("categoryName") String categoryName, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.category IS NOT NULL AND LOWER(p.category.name) = LOWER(:categoryName)")
+    Page<Product> findAllActiveByCategoryName(@Param("categoryName") String categoryName, Pageable pageable);
+
     @Query("SELECT p FROM Product p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Product> searchProducts(@Param("query") String query, Pageable pageable);

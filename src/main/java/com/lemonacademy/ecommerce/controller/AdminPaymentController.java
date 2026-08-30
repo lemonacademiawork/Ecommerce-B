@@ -101,11 +101,25 @@ public class AdminPaymentController {
 
     private Order findOrder(String orderId) {
         Order order = orderRepository.findByOrderNumber(orderId).orElse(null);
+        if (order == null && isStandardUuid(orderId)) {
+            order = orderRepository.findById(java.util.UUID.fromString(orderId)).orElse(null);
+        }
         if (order == null) {
-            order = orderRepository.findById(java.util.UUID.fromString(orderId))
-                    .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+            throw new ResourceNotFoundException("Order not found: " + orderId);
         }
         return order;
+    }
+
+    private boolean isStandardUuid(String str) {
+        if (str == null || str.length() != 36) {
+            return false;
+        }
+        try {
+            java.util.UUID.fromString(str);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private AdminPaymentResponse mapToAdminPaymentResponse(Order order) {

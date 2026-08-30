@@ -52,7 +52,8 @@ public class ProductService {
     public PageResponseDto<ProductResponseDto> getActiveProducts(Pageable pageable) {
         String cacheKey = makeCacheKey("global-active", pageable);
         return getCachedOrFetch(cacheKey, () -> {
-            Page<Product> productPage = productRepository.findAllByActiveTrue(pageable);
+            String kitCategoryName = "ReadyMade Kits";
+            Page<Product> productPage = productRepository.findAllActiveByCategoryName(kitCategoryName, pageable);
             return PageResponseDto.of(productPage, this::convertToDto);
         });
     }

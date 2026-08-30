@@ -49,6 +49,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.success("Validation failed", errors));
     }
 
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Invalid request payload or field format: " + ex.getMessage()));
+    }
+
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiResponse<Void>> handleInsufficientStock(InsufficientStockException ex) {
         return ResponseEntity

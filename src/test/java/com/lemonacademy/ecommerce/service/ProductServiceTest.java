@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -95,14 +96,16 @@ class ProductServiceTest {
 
     @Test
     void getActiveProducts_Success() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
-        when(productRepository.findAllByActiveTrue(any(Pageable.class))).thenReturn(productPage);
+        Pageable pageable = PageRequest.of(0, 8);
+        Page<Product> kitPage = new PageImpl<>(Collections.singletonList(product));
+        
+        when(productRepository.findAllActiveByCategoryName(eq("ReadyMade Kits"), any(Pageable.class))).thenReturn(kitPage);
 
         PageResponseDto<ProductResponseDto> response = productService.getActiveProducts(pageable);
 
         assertThat(response).isNotNull();
         assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getContent().get(0).getName()).isEqualTo("Laptop");
     }
 
     @Test
