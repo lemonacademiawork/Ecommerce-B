@@ -442,17 +442,20 @@ public class OrderService {
 
         String displayId = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getId() != null ? order.getId().toString() : null);
 
-        // Ensure effective order status strictly matches payment verification state
+        // Ensure effective order status & payment status strictly match payment verification state
+        PaymentStatus effectivePaymentStatus = order.getPaymentStatus() != null ? order.getPaymentStatus() : PaymentStatus.PENDING;
         OrderStatus effectiveStatus = order.getStatus();
-        if (order.getPaymentStatus() == PaymentStatus.FAILED) {
-            effectiveStatus = OrderStatus.PAYMENT_FAILED;
-        } else if (order.getPaymentStatus() == PaymentStatus.PENDING) {
-            if (effectiveStatus == OrderStatus.PAID || effectiveStatus == OrderStatus.CONFIRMED || effectiveStatus == OrderStatus.PENDING) {
-                effectiveStatus = OrderStatus.PAYMENT_PENDING;
-            }
-        } else if (order.getPaymentStatus() == PaymentStatus.PAID) {
-            if (effectiveStatus == OrderStatus.PENDING || effectiveStatus == OrderStatus.PAYMENT_PENDING || effectiveStatus == OrderStatus.PAYMENT_FAILED) {
+
+        if (effectivePaymentStatus == PaymentStatus.PAID) {
+            if (effectiveStatus == null || effectiveStatus == OrderStatus.PENDING || effectiveStatus == OrderStatus.PAYMENT_PENDING || effectiveStatus == OrderStatus.PAYMENT_FAILED) {
                 effectiveStatus = OrderStatus.CONFIRMED;
+            }
+        } else if (effectivePaymentStatus == PaymentStatus.FAILED) {
+            effectiveStatus = OrderStatus.PAYMENT_FAILED;
+        } else { // PENDING or unverified
+            effectivePaymentStatus = PaymentStatus.PENDING;
+            if (effectiveStatus == null || effectiveStatus == OrderStatus.PAID || effectiveStatus == OrderStatus.CONFIRMED || effectiveStatus == OrderStatus.PENDING) {
+                effectiveStatus = OrderStatus.PAYMENT_PENDING;
             }
         }
 
@@ -487,7 +490,7 @@ public class OrderService {
                 .breadth(order.getBreadth())
                 .height(order.getHeight())
                 .paymentMethod(order.getPaymentMethod())
-                .paymentStatus(order.getPaymentStatus())
+                .paymentStatus(effectivePaymentStatus)
                 .transactionId(order.getTransactionId())
                 .paymentScreenshotUrl(order.getPaymentScreenshotUrl())
                 .build();
