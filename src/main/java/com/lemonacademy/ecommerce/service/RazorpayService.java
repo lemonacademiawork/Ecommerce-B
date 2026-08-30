@@ -31,6 +31,9 @@ public class RazorpayService {
     private final RazorpayClient razorpayClient;
     private final OrderRepository orderRepository;
 
+    @Value("${razorpay.key.id}")
+    private String keyId;
+
     @Value("${razorpay.key.secret}")
     private String keySecret;
 
@@ -52,7 +55,7 @@ public class RazorpayService {
             JSONObject orderRequest = new JSONObject();
             orderRequest.put("amount", amountInPaise.longValue());
             orderRequest.put("currency", "INR");
-            orderRequest.put("receipt", order.getOrderNumber() != null ? order.getOrderNumber() : order.getId().toString());
+            orderRequest.put("receipt", order.getOrderNumber() != null ? order.getOrderNumber() : ("receipt_" + order.getId().toString()));
 
             com.razorpay.Order razorpayOrder = razorpayClient.orders.create(orderRequest);
 
@@ -65,6 +68,7 @@ public class RazorpayService {
                     .razorpayOrderId(razorpayOrderId)
                     .amount(order.getTotalAmount())
                     .currency("INR")
+                    .keyId(keyId)
                     .internalOrderId(internalOrderId)
                     .build();
 

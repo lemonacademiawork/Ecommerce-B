@@ -15,5 +15,6 @@ public class RazorpayOrderResponse {
     private String razorpayOrderId;
     private BigDecimal amount;
     private String currency;
+    private String keyId;
     private String internalOrderId;
 }
