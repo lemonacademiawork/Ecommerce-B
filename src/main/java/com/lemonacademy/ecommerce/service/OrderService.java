@@ -130,7 +130,7 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setShipmentStatus("PENDING_BOOKING");
 
@@ -393,7 +393,10 @@ public class OrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         }
 
-        if (status == OrderStatus.PAID) {
+        if (status == OrderStatus.PAID || status == OrderStatus.CONFIRMED) {
+            if (order.getPaymentStatus() != PaymentStatus.PAID) {
+                throw new InvalidOperationException("Cannot mark order as PAID or CONFIRMED until payment signature is verified or webhook confirms payment.");
+            }
             order.setPaymentStatus(com.lemonacademy.ecommerce.entity.PaymentStatus.PAID);
             order.setStatus(OrderStatus.CONFIRMED);
             if (order.getPaymentVerifiedAt() == null) {
@@ -439,6 +442,20 @@ public class OrderService {
 
         String displayId = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getId() != null ? order.getId().toString() : null);
 
+        // Ensure effective order status strictly matches payment verification state
+        OrderStatus effectiveStatus = order.getStatus();
+        if (order.getPaymentStatus() == PaymentStatus.FAILED) {
+            effectiveStatus = OrderStatus.PAYMENT_FAILED;
+        } else if (order.getPaymentStatus() == PaymentStatus.PENDING) {
+            if (effectiveStatus == OrderStatus.PAID || effectiveStatus == OrderStatus.CONFIRMED || effectiveStatus == OrderStatus.PENDING) {
+                effectiveStatus = OrderStatus.PAYMENT_PENDING;
+            }
+        } else if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            if (effectiveStatus == OrderStatus.PENDING || effectiveStatus == OrderStatus.PAYMENT_PENDING || effectiveStatus == OrderStatus.PAYMENT_FAILED) {
+                effectiveStatus = OrderStatus.CONFIRMED;
+            }
+        }
+
         return OrderResponse.builder()
                 .id(displayId)
                 .orderNumber(displayId)
@@ -450,7 +467,7 @@ public class OrderService {
                 .shippingCharge(order.getShippingCharge())
                 .discountAmount(order.getDiscountAmount())
                 .couponCode(order.getCouponCode())
-                .status(order.getStatus())
+                .status(effectiveStatus)
                 .items(itemResponses)
                 .createdAt(order.getCreatedAt())
                 .shipmentId(order.getShipmentId())
