@@ -459,6 +459,10 @@ public class OrderService {
             }
         }
 
+        boolean isPaid = effectivePaymentStatus == PaymentStatus.PAID;
+        boolean isPending = effectivePaymentStatus == PaymentStatus.PENDING || effectivePaymentStatus == PaymentStatus.PENDING_VERIFICATION;
+        boolean isFailed = effectivePaymentStatus == PaymentStatus.FAILED;
+
         return OrderResponse.builder()
                 .id(displayId)
                 .orderNumber(displayId)
@@ -493,6 +497,10 @@ public class OrderService {
                 .paymentStatus(effectivePaymentStatus)
                 .transactionId(order.getTransactionId())
                 .paymentScreenshotUrl(order.getPaymentScreenshotUrl())
+                .isPaymentPending(isPending)
+                .isPaid(isPaid)
+                .isPaymentFailed(isFailed)
+                .paymentVerified(isPaid)
                 .build();
     }
 

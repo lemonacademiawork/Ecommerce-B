@@ -37,6 +37,10 @@ public class OrderResponse {
     private com.lemonacademy.ecommerce.entity.PaymentStatus paymentStatus;
     private String transactionId;
     private String paymentScreenshotUrl;
+    private Boolean isPaymentPending;
+    private Boolean isPaid;
+    private Boolean isPaymentFailed;
+    private Boolean paymentVerified;
 
     // Shipping Fields
     private String shipmentId;
