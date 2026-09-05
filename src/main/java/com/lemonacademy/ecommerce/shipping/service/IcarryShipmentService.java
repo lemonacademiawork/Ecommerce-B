@@ -161,6 +161,7 @@ public class IcarryShipmentService {
             order.setAwbNumber(awb);
             order.setTrackingNumber(awb);
             order.setCourierName(courier);
+            order.setShippingCharge(BigDecimal.valueOf(rate));
             order.setShipmentStatus("BOOKED");
             
             // Default 3-5 days delivery date

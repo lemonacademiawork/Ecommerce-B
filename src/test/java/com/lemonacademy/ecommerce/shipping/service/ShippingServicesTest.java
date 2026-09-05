@@ -59,7 +59,7 @@ public class ShippingServicesTest {
         shipmentService = new IcarryShipmentService(client, config, orderRepository, objectMapper, null);
         trackingService = new IcarryTrackingService(client, orderRepository, objectMapper);
         webhookService = new IcarryWebhookService(orderRepository, config);
-        labelService = new IcarryLabelService(client, orderRepository, objectMapper);
+        labelService = new IcarryLabelService(client, config, orderRepository, objectMapper);
         pickupService = new IcarryPickupService(client, orderRepository, objectMapper, null);
 
         Address address = Address.builder()
@@ -83,6 +83,7 @@ public class ShippingServicesTest {
 
         order = Order.builder()
                 .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .orderNumber("LH-20260724-ABCD")
                 .address(address)
                 .totalAmount(BigDecimal.valueOf(200.0))
                 .items(List.of(item))
@@ -203,18 +204,55 @@ public class ShippingServicesTest {
 
     @Test
     void testGenerateLabel() {
-        order.setShipmentId("SHIP123");
-        order.setAwbNumber("AWB123");
+        order.setShipmentId("7462228");
+        order.setAwbNumber("372307931715");
 
-        String responseJson = "{\"label_url\":\"https://icarry.in/labels/SHIP123.pdf\"}";
+        String responseJson = "{\"label_url\":\"https://icarry.in/labels/7462228.pdf\"}";
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
-        when(client.post(eq("/api_label"), any(), eq(true))).thenReturn(responseJson);
+        when(client.post(eq("/api_print_label"), any(), eq(true))).thenReturn(responseJson);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         String labelUrl = labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
 
-        assertEquals("https://icarry.in/labels/SHIP123.pdf", labelUrl);
-        assertEquals("https://icarry.in/labels/SHIP123.pdf", order.getLabelUrl());
+        assertEquals("https://icarry.in/labels/7462228.pdf", labelUrl);
+        assertEquals("https://icarry.in/labels/7462228.pdf", order.getLabelUrl());
+    }
+
+    @Test
+    void testGetLabelPdfBytes() {
+        order.setShipmentId("7462228");
+        order.setAwbNumber("372307931715");
+        order.setLabelUrl("https://icarry.in/labels/7462228.pdf");
+
+        byte[] fakePdf = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34}; // %PDF-1.4
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+        when(client.downloadBinary(eq("https://icarry.in/labels/7462228.pdf"))).thenReturn(fakePdf);
+
+        byte[] result = labelService.getLabelPdfBytes(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+
+        assertNotNull(result);
+        assertArrayEquals(fakePdf, result);
+    }
+
+    @Test
+    void testGetLabelMetadata() {
+        order.setShipmentId("7462228");
+        order.setAwbNumber("372307931715");
+        order.setCourierName("Amazon Shipping");
+        order.setLabelUrl("https://icarry.in/labels/7462228.pdf");
+        order.setShipmentStatus("BOOKED");
+
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+
+        LabelResponseDto metadata = labelService.getLabelMetadata(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+
+        assertNotNull(metadata);
+        assertEquals("7462228", metadata.getShipmentId());
+        assertEquals("372307931715", metadata.getAwbNumber());
+        assertEquals("Amazon Shipping", metadata.getCourierName());
+        assertEquals("https://icarry.in/labels/7462228.pdf", metadata.getLabelUrl());
+        assertTrue(metadata.getDownloadUrl().contains("download"));
+        assertTrue(metadata.getViewUrl().contains("pdf"));
     }
 
     @Test

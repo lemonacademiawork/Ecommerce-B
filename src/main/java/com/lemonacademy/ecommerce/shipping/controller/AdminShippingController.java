@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -98,12 +100,84 @@ public class AdminShippingController {
     }
 
     @GetMapping("/label/{orderId}")
-    @Operation(summary = "Generate/Download shipping label", description = "Requests a printable PDF label URL from iCarry and saves it in the order's database entry.")
-    public ResponseEntity<ApiResponse<String>> generateLabel(@Parameter(description = "The database Order ID or order number") @PathVariable String orderId) {
-        log.info("Admin label generation requested for order ID: {}", orderId);
+    @Operation(summary = "Generate/Download shipping label", description = "Retrieves printable PDF or label metadata from iCarry for a booked shipment.")
+    public ResponseEntity<?> generateLabel(
+            @Parameter(description = "The database Order ID or order number") @PathVariable String orderId,
+            @RequestParam(value = "format", required = false) String format,
+            @RequestParam(value = "download", required = false) Boolean download,
+            @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptHeader) {
+        
+        log.info("Admin shipping label requested for order ID: {}, format: {}, download: {}, accept: {}", 
+                 orderId, format, download, acceptHeader);
         Order order = resolveOrder(orderId);
-        String labelUrl = labelService.generateLabel(order.getId());
-        return ResponseEntity.ok(ApiResponse.success("Label generated successfully", labelUrl));
+
+        // Check if caller explicitly desires JSON
+        boolean isExplicitJson = "json".equalsIgnoreCase(format) || 
+                (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE) 
+                        && !acceptHeader.contains(MediaType.APPLICATION_PDF_VALUE) 
+                        && !acceptHeader.contains(MediaType.ALL_VALUE));
+
+        if (isExplicitJson) {
+            String labelUrl = labelService.generateLabel(order.getId());
+            return ResponseEntity.ok(ApiResponse.success("Label generated successfully", labelUrl));
+        }
+
+        // Return real binary PDF stream
+        byte[] pdfBytes = labelService.getLabelPdfBytes(order.getId());
+        String filename = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getShipmentId() != null ? order.getShipmentId() : order.getId().toString());
+        String disposition = Boolean.TRUE.equals(download) 
+                ? "attachment; filename=\"shipping-label-" + filename + ".pdf\"" 
+                : "inline; filename=\"shipping-label-" + filename + ".pdf\"";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .body(pdfBytes);
+    }
+
+    @GetMapping(value = "/label/{orderId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(summary = "View shipping label PDF inline", description = "Streams the raw shipping label PDF bytes directly for inline browser rendering.")
+    public ResponseEntity<byte[]> viewShippingLabelPdf(
+            @Parameter(description = "The database Order ID or order number") @PathVariable String orderId) {
+        log.info("Admin streaming shipping label PDF inline for order ID: {}", orderId);
+        Order order = resolveOrder(orderId);
+        byte[] pdfBytes = labelService.getLabelPdfBytes(order.getId());
+        String filename = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getShipmentId() != null ? order.getShipmentId() : order.getId().toString());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"shipping-label-" + filename + ".pdf\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .body(pdfBytes);
+    }
+
+    @GetMapping(value = "/label/{orderId}/download", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(summary = "Download shipping label PDF", description = "Downloads the shipping label PDF as a file attachment.")
+    public ResponseEntity<byte[]> downloadShippingLabelPdf(
+            @Parameter(description = "The database Order ID or order number") @PathVariable String orderId) {
+        log.info("Admin downloading shipping label PDF attachment for order ID: {}", orderId);
+        Order order = resolveOrder(orderId);
+        byte[] pdfBytes = labelService.getLabelPdfBytes(order.getId());
+        String filename = order.getOrderNumber() != null ? order.getOrderNumber() : (order.getShipmentId() != null ? order.getShipmentId() : order.getId().toString());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"shipping-label-" + filename + ".pdf\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .body(pdfBytes);
+    }
+
+    @GetMapping(value = "/label/{orderId}/url", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get shipping label metadata & URL", description = "Returns shipping label metadata including carrier URL and direct backend PDF download/view URLs.")
+    public ResponseEntity<ApiResponse<LabelResponseDto>> getShippingLabelMetadata(
+            @Parameter(description = "The database Order ID or order number") @PathVariable String orderId) {
+        log.info("Admin requested shipping label metadata for order ID: {}", orderId);
+        Order order = resolveOrder(orderId);
+        LabelResponseDto metadata = labelService.getLabelMetadata(order.getId());
+        return ResponseEntity.ok(ApiResponse.success("Shipping label metadata retrieved successfully", metadata));
     }
 
     @PostMapping("/pickup/address")

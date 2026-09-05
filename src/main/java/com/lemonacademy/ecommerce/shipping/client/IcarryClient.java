@@ -178,6 +178,148 @@ public class IcarryClient {
         }
     }
 
+    public byte[] downloadBinary(String urlOrPath) {
+        String correlationId = UUID.randomUUID().toString();
+        log.info("[iCarry Download Binary] CorrelationID: {}, Target: {}", correlationId, maskSensitiveData(urlOrPath));
+
+        long startTime = System.currentTimeMillis();
+        try {
+            String targetUri;
+            if (urlOrPath.startsWith("http://") || urlOrPath.startsWith("https://")) {
+                targetUri = urlOrPath;
+                // If it's on iCarry domain and does not have api_token, append it
+                if (urlOrPath.contains("icarry.in") && !urlOrPath.contains("api_token=")) {
+                    String token = authService.getApiToken();
+                    targetUri = targetUri + (targetUri.contains("?") ? "&" : "?") + "api_token=" + token;
+                }
+            } else {
+                String token = authService.getApiToken();
+                targetUri = urlOrPath + (urlOrPath.contains("?") ? "&" : "?") + "api_token=" + token;
+            }
+
+            ResponseEntity<byte[]> response = restClient.get()
+                    .uri(targetUri)
+                    .retrieve()
+                    .onStatus(
+                            status -> status.is4xxClientError() || status.is5xxServerError(),
+                            (req, resp) -> {
+                                int code = resp.getStatusCode().value();
+                                throw new IcarryApiException("Failed to download label binary: HTTP " + code, code);
+                            })
+                    .toEntity(byte[].class);
+
+            long duration = System.currentTimeMillis() - startTime;
+            byte[] bytes = response.getBody();
+            int len = bytes != null ? bytes.length : 0;
+            log.info("[iCarry Download Binary Response] CorrelationID: {}, Status: {}, Size: {} bytes, Time: {}ms",
+                    correlationId, response.getStatusCode(), len, duration);
+
+            if (bytes == null || bytes.length == 0) {
+                throw new IcarryApiException("Downloaded label binary is empty", 500);
+            }
+
+            return bytes;
+        } catch (IcarryApiException e) {
+            log.error("[iCarry Binary Download Error] CorrelationID: {}, Message: {}", correlationId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("[iCarry Binary Download Error] CorrelationID: {}, Message: {}", correlationId, e.getMessage());
+            throw new IcarryApiException("Failed to download shipping label binary: " + e.getMessage(), 500, e);
+        }
+    }
+
+    public byte[] postForBytes(String path, Object body, boolean isRetryable) {
+        String correlationId = UUID.randomUUID().toString();
+        Supplier<byte[]> requestExecutor = () -> {
+            String token = authService.getApiToken();
+            String uri = path + (path.contains("?") ? "&" : "?") + "api_token=" + token;
+
+            long startTime = System.currentTimeMillis();
+            try {
+                RestClient.RequestBodySpec requestSpec = restClient.post().uri(uri);
+
+                if (body instanceof MultiValueMap) {
+                    MultiValueMap<?, ?> map = (MultiValueMap<?, ?>) body;
+                    StringBuilder sb = new StringBuilder();
+                    for (java.util.Map.Entry<?, ? extends java.util.List<?>> entry : map.entrySet()) {
+                        for (Object val : entry.getValue()) {
+                            if (sb.length() > 0) sb.append("&");
+                            sb.append(java.net.URLEncoder.encode(String.valueOf(entry.getKey()), java.nio.charset.StandardCharsets.UTF_8));
+                            sb.append("=");
+                            if (val != null) {
+                                sb.append(java.net.URLEncoder.encode(String.valueOf(val), java.nio.charset.StandardCharsets.UTF_8));
+                            }
+                        }
+                    }
+                    String formBody = sb.toString();
+                    requestSpec.contentType(MediaType.APPLICATION_FORM_URLENCODED).body(formBody);
+                } else {
+                    requestSpec.contentType(MediaType.APPLICATION_JSON).body(body);
+                }
+
+                log.info("[iCarry API Request Bytes] CorrelationID: {}, URL: {}{}", correlationId, config.getBaseUrl(), path);
+
+                ResponseEntity<byte[]> response = requestSpec
+                        .retrieve()
+                        .onStatus(
+                                status -> status.is4xxClientError() || status.is5xxServerError(),
+                                (req, resp) -> {
+                                    int code = resp.getStatusCode().value();
+                                    throw new IcarryApiException("iCarry API returned HTTP " + code + " for " + path, code);
+                                })
+                        .toEntity(byte[].class);
+
+                long duration = System.currentTimeMillis() - startTime;
+                byte[] bytes = response.getBody();
+                int len = bytes != null ? bytes.length : 0;
+                log.info("[iCarry API Response Bytes] CorrelationID: {}, Status: {}, Size: {} bytes, Time: {}ms",
+                        correlationId, response.getStatusCode(), len, duration);
+
+                if (bytes == null || bytes.length == 0) {
+                    throw new IcarryApiException("Empty response received from iCarry", 500);
+                }
+
+                return bytes;
+            } catch (IcarryApiException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IcarryApiException("Failed to communicate with iCarry: " + e.getMessage(), 500, e);
+            }
+        };
+
+        if (isRetryable) {
+            int attempt = 0;
+            int maxAttempts = 3;
+            long delayMs = 1000;
+            while (attempt < maxAttempts) {
+                attempt++;
+                try {
+                    return requestExecutor.get();
+                } catch (IcarryApiException e) {
+                    if (e.getStatusCode() == 401 && attempt < maxAttempts) {
+                        log.warn("Unauthorized (401) — refreshing iCarry token and retrying. Attempt {}/{}", attempt, maxAttempts);
+                        authService.forceRefresh();
+                        continue;
+                    }
+                    if (attempt >= maxAttempts) throw e;
+                } catch (Exception e) {
+                    if (attempt >= maxAttempts) {
+                        throw new IcarryApiException("Failed after " + maxAttempts + " attempts: " + e.getMessage(), 500, e);
+                    }
+                }
+                try {
+                    Thread.sleep(delayMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new IcarryApiException("Execution interrupted", 500, ie);
+                }
+            }
+            throw new IcarryApiException("Failed to execute byte request", 500);
+        } else {
+            return requestExecutor.get();
+        }
+    }
+
     private String executeWithRetry(Supplier<String> action, int maxAttempts, long delayMs) {
         int attempt = 0;
         while (attempt < maxAttempts) {

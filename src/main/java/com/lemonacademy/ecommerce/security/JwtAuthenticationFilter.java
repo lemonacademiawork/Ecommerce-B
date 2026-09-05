@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -44,17 +43,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
+        String extractedJwt = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            extractedJwt = authHeader.substring(7);
+        } else if (request.getParameter("token") != null && !request.getParameter("token").isBlank()) {
+            extractedJwt = request.getParameter("token").trim();
+        } else if (request.getParameter("auth_token") != null && !request.getParameter("auth_token").isBlank()) {
+            extractedJwt = request.getParameter("auth_token").trim();
+        } else if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("jwt".equalsIgnoreCase(cookie.getName()) || "token".equalsIgnoreCase(cookie.getName()) || "admin_token".equalsIgnoreCase(cookie.getName())) {
+                    extractedJwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (extractedJwt == null || extractedJwt.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
+        final String jwt = extractedJwt;
         try {
-            userEmail = jwtService.extractUsername(jwt);
+            final String userEmail = jwtService.extractUsername(jwt);
             String role = jwtService.extractRole(jwt);
             log.info("JWT auth filter: email={}, role={}, uri={}", userEmail, role, request.getRequestURI());
 
@@ -92,4 +105,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-

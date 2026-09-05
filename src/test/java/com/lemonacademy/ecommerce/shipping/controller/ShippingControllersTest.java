@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,8 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ShippingControllersTest {
@@ -94,8 +94,11 @@ public class ShippingControllersTest {
         
         order = Order.builder()
                 .id(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .orderNumber("LH-20260724-ABCD")
+                .shipmentId("7462228")
+                .courierName("Amazon Shipping")
                 .user(customerUser)
-                .awbNumber("AWB123")
+                .awbNumber("372307931715")
                 .shipmentStatus("BOOKED")
                 .build();
 
@@ -168,13 +171,67 @@ public class ShippingControllersTest {
     }
 
     @Test
-    void testAdminGenerateLabel() throws Exception {
+    void testAdminGenerateLabelPdfStream() throws Exception {
+        byte[] fakePdf = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34};
         when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
-        when(labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn("https://icarry.in/labels/1.pdf");
+        when(labelService.getLabelPdfBytes(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(fakePdf);
 
-        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542"))
+        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542")
+                .accept(MediaType.APPLICATION_PDF))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").value("https://icarry.in/labels/1.pdf"));
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"shipping-label-LH-20260724-ABCD.pdf\""))
+                .andExpect(content().bytes(fakePdf));
+    }
+
+    @Test
+    void testAdminGenerateLabelJsonExplicit() throws Exception {
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+        when(labelService.generateLabel(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn("https://icarry.in/labels/7462228.pdf");
+
+        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542?format=json"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").value("https://icarry.in/labels/7462228.pdf"));
+    }
+
+    @Test
+    void testAdminDownloadLabelPdf() throws Exception {
+        byte[] fakePdf = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34};
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+        when(labelService.getLabelPdfBytes(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(fakePdf);
+
+        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542/download"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"shipping-label-LH-20260724-ABCD.pdf\""))
+                .andExpect(content().bytes(fakePdf));
+    }
+
+    @Test
+    void testAdminGetLabelMetadata() throws Exception {
+        LabelResponseDto metadata = LabelResponseDto.builder()
+                .orderId(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))
+                .orderNumber("LH-20260724-ABCD")
+                .shipmentId("7462228")
+                .awbNumber("372307931715")
+                .courierName("Amazon Shipping")
+                .labelUrl("https://icarry.in/labels/7462228.pdf")
+                .downloadUrl("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542/download")
+                .viewUrl("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542/pdf")
+                .shipmentStatus("BOOKED")
+                .build();
+
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+        when(labelService.getLabelMetadata(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(metadata);
+
+        mockMvcAdmin.perform(get("/api/admin/shipping/label/23db3d7a-683b-372b-8036-95da3ae5c542/url"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.shipmentId").value("7462228"))
+                .andExpect(jsonPath("$.data.awbNumber").value("372307931715"))
+                .andExpect(jsonPath("$.data.courierName").value("Amazon Shipping"))
+                .andExpect(jsonPath("$.data.labelUrl").value("https://icarry.in/labels/7462228.pdf"));
     }
 
     @Test
@@ -237,7 +294,7 @@ public class ShippingControllersTest {
         when(orderRepository.findByAwbNumber("AWB123")).thenReturn(Optional.of(order));
 
         mockMvcCustomer.perform(get("/api/shipping/track/AWB123"))
-                .andExpect(status().is4xxClientError()); // Triggers global handler which maps UnauthorizedAccessException to 403 Forbidden or similar.
+                .andExpect(status().is4xxClientError());
 
         SecurityContextHolder.clearContext();
     }
