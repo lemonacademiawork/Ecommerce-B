@@ -59,7 +59,8 @@ public class ShippingServicesTest {
         shipmentService = new IcarryShipmentService(client, config, orderRepository, objectMapper, null);
         trackingService = new IcarryTrackingService(client, orderRepository, objectMapper);
         webhookService = new IcarryWebhookService(orderRepository, config);
-        labelService = new IcarryLabelService(client, config, orderRepository, objectMapper);
+        ShippingLabelPdfGenerator pdfGenerator = new ShippingLabelPdfGenerator();
+        labelService = new IcarryLabelService(client, config, orderRepository, objectMapper, pdfGenerator);
         pickupService = new IcarryPickupService(client, orderRepository, objectMapper, null);
 
         Address address = Address.builder()
@@ -232,6 +233,26 @@ public class ShippingServicesTest {
 
         assertNotNull(result);
         assertArrayEquals(fakePdf, result);
+    }
+
+    @Test
+    void testGetLabelPdfBytesInternalFallback() {
+        order.setShipmentId("7462228");
+        order.setAwbNumber("372307931715");
+        order.setCourierName("Amazon Shipping");
+        order.setLabelUrl(null);
+
+        when(orderRepository.findById(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"))).thenReturn(Optional.of(order));
+
+        byte[] result = labelService.getLabelPdfBytes(UUID.fromString("23db3d7a-683b-372b-8036-95da3ae5c542"));
+
+        assertNotNull(result);
+        assertTrue(result.length > 100);
+        // Verify PDF Magic Bytes (%PDF)
+        assertEquals(0x25, result[0]);
+        assertEquals(0x50, result[1]);
+        assertEquals(0x44, result[2]);
+        assertEquals(0x46, result[3]);
     }
 
     @Test
